@@ -1,0 +1,20 @@
+#pragma once
+
+/*
+ * Created by Kami-Kaze on 4/3/2021.
+ */
+
+
+namespace Engine {
+    class RenderSurface {
+    public:
+        virtual ~RenderSurface() = default;
+
+        virtual void* getProcAddressFun() = 0;
+        virtual void makeContextCurrent() = 0;
+
+        virtual void swapBuffers() = 0;
+
+        virtual void setVsync(bool enable) = 0;
+    };
+}

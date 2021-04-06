@@ -1,0 +1,57 @@
+#pragma once
+
+/*
+ * Created by Kami-Kaze on 3/27/2021.
+ */
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "core/window/window.h"
+#include "core/events/event.h"
+
+namespace Engine {
+
+    namespace internal::glfw {
+        void setWindowHint(int name, bool enable);
+    }
+
+    class WindowsWindow : public Window {
+    public:
+        explicit WindowsWindow(const WindowProps& props, MessageQueue* messageQueue);
+
+        virtual ~WindowsWindow();
+
+        void swapBuffers() override;
+
+        void setVsync(bool enable) override;
+
+        void pollEvents() override;
+
+        void waitEvents() override;
+
+        void* getProcAddressFun() override;
+        void makeContextCurrent() override;
+
+        Context* getContext() override;
+
+    private:
+        GLFWwindow* window = nullptr;
+
+        struct WindowData {
+            int width = 0, height = 0, posX = 0, posY = 0;
+            int vpWidth = 0, vpHeight = 0;
+            bool vsync = true, multisample = true;
+            GLFWmonitor* monitor = nullptr;
+            MessageQueue* messageQueue = nullptr;
+            Context* context = nullptr;
+        };
+
+        WindowData data;
+
+        void init(const WindowProps& props);
+
+        void shutdown();
+    };
+
+}
