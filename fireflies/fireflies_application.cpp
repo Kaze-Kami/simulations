@@ -113,8 +113,8 @@ void FirefliesApplication::setup(Engine::ApplicationProps& props) {
     WindowProps& windowProps = props.windowProps;
 
     // simple window
-    props.name = "Sandbox application";
-    windowProps.name = "Sandbox Window";
+    props.name = "Firefly simulation";
+    windowProps.name = "Firefly simulation";
     windowProps.width = 1000;
     windowProps.height = 1000;
     windowProps.center = true;
