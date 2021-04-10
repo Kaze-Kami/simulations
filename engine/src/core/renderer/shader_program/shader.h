@@ -11,7 +11,7 @@
 namespace Engine {
 
     enum ShaderType {
-        VERTEX=GL_VERTEX_SHADER, FRAGMENT=GL_FRAGMENT_SHADER
+        VERTEX=GL_VERTEX_SHADER, FRAGMENT=GL_FRAGMENT_SHADER, COMPUTE=GL_COMPUTE_SHADER,
     };
 
     class Shader {
