@@ -1,7 +1,7 @@
 project(sandbox)
 
 # Source files
-set(SRC sandbox.cpp)
+set(SRC sandbox_main.cpp)
 
 # Includes
 set(INCLUDE src)
