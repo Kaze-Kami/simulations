@@ -42,10 +42,10 @@ protected:
 private:
 
     // config, here for now
-    static constexpr int nFireflies = 1000;
+    static constexpr int nFireflies = 500;
 
     static constexpr float                                     // phi(t+dt) = (phi(t) + omega * dt) % phiMax
-            frequency = .5f,                                   // how often we want to blink per second
+            frequency = 1.f,                                   // how often we want to blink per second
             omega = frequency * glm::radians(360.f),    // angular velocity of clock
             phiMax = glm::radians(360.f);               // clock max angle
 
@@ -53,8 +53,8 @@ private:
 
 
     static constexpr float                          // nudge[i, j] = baseMu / exp(epsilon * |i - j|)
-            baseMu = .10,                           // how much nearby fireflies effect a given firefly
-            epsilon = 04.f;                         // how 'fast' a fireflies vision 'decays'
+            baseMu = .3,                            // how much nearby fireflies effect a given firefly
+            epsilon = 10.f;                         // how 'fast' a fireflies vision 'decays'
 
 
 
@@ -64,10 +64,12 @@ private:
 
     float phi = 0;
 
+    // render chain
     Engine::ShaderProgram* shaderProgram = nullptr;
     Engine::VertexBuffer<FireflyVertex>* vertexBuffer = nullptr;
     Engine::Buffer<int>* indexBuffer = nullptr;
     Engine::VertexArray* vertexArray = nullptr;
+
 };
 
 

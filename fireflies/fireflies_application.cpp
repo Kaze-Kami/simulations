@@ -30,9 +30,7 @@ const char* fragmentShaderCode =
         "    o_color = i_color;"
         "}";
 
-const char* computeShaderCode =
-        "#version 450 core\n"
-        "";
+const char* computeShaderCode = "";
 
 static float rnd(float min, float max) {
     return min + ((float) rand() / (RAND_MAX)) * (max - min);
@@ -56,10 +54,11 @@ void FirefliesApplication::onContextAttach() {
     // create shader program
     shaderProgram = ShaderProgram::fromShaderList(shaders);
 
-    // delete shaders
+    // delete shader code
     for (Shader* shader : shaders) {
         delete shader;
     }
+    shaders.clear();
 
     // create vertex array
     vertexArray = new VertexArray();
@@ -96,11 +95,12 @@ void FirefliesApplication::onContextAttach() {
     indexBuffer->unbind();
 
     /*
-     * Create compute shader for updates
+     * todo: Create compute shader for updates
      */
 }
 
 void FirefliesApplication::onContextDetach() {
+    // shader program
     delete shaderProgram;
     delete vertexArray;
     delete vertexBuffer;
@@ -137,8 +137,9 @@ void FirefliesApplication::setup(Engine::ApplicationProps& props) {
         f.phase = rnd(0.f, glm::radians(360.0));
         f.size = Firefly::baseSize;
         f.position = -1.f + glm::vec2(rnd(), rnd()) * 2.f;
-        const float hue = rnd(0.f, 360.f);
-        f.color = glm::rgbColor(glm::vec3(hue, Firefly::colorSaturation, Firefly::colorValue));
+        // const float hue = rnd(0.f, 360.f);
+        // f.color = glm::rgbColor(glm::vec3(hue, Firefly::colorSaturation, Firefly::colorValue));
+        f.color = glm::rgbColor(glm::vec3(60, Firefly::colorSaturation, Firefly::colorValue));
 
         // init vertices (4 per firefly)
         for (int j = 0; j < 4; j++) {
@@ -158,6 +159,7 @@ void FirefliesApplication::update(float dt) {
 
     for (int i = 0; i < nFireflies; i++) {
         Firefly& fA = fireflies[i];
+
         float nudge = nudges[i];
 
         for (int j = i + 1; j < nFireflies; j++) {
@@ -166,7 +168,7 @@ void FirefliesApplication::update(float dt) {
 
             const Firefly& fB = fireflies[j];
             const float d = glm::distance(fA.position, fB.position);
-            const float mu = baseMu / glm::exp(epsilon * d);
+            const float mu = baseMu / glm::pow(1.f + d, epsilon);
             const float dPhase = mu * (fB.phase - fA.phase);
 
             // update nudges
@@ -187,6 +189,8 @@ void FirefliesApplication::update(float dt) {
             brightness = 0;
         }
 
+        // fA.color = glm::rgbColor(glm::vec3(glm::degrees(fA.phase), Firefly::colorSaturation, Firefly::colorValue));
+
         const glm::vec3 color = fA.color * brightness;
 
         for (int j = 0; j < 4; j++) {
@@ -195,7 +199,7 @@ void FirefliesApplication::update(float dt) {
         }
 
         // clear buffer
-        nudges[i] = 0;
+        //nudges[i] = 0;
     }
 }
 
