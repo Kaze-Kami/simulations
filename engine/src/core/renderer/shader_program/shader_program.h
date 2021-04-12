@@ -3,7 +3,7 @@
 /*
  * Created by Kami-Kaze on 3/28/2021.
  */
-#include "shader.h"
+#include "shader_list.h"
 
 namespace Engine {
 
@@ -15,13 +15,13 @@ namespace Engine {
 
         int getUniformLocation(std::string name) const;
 
-        static ShaderProgram* fromShaderList(std::vector<Shader*>& shaders);
+        static ShaderProgram* fromShaderList(const ShaderList& shaderList);
     private:
         explicit ShaderProgram(GLuint id);
 
         GLuint id;
 
-        static GLuint linkShaderProgram(std::vector<Shader*>& shaders);
+        static GLuint linkShaderProgram(const ShaderList& shaderList);
     };
 
 }

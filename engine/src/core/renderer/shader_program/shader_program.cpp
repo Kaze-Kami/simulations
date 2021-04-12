@@ -3,6 +3,9 @@
  */
 
 #include "shader_program.h"
+
+#include <iostream>
+
 #include "macros/gl_call.h"
 
 namespace Engine {
@@ -22,24 +25,30 @@ namespace Engine {
     }
 
     int ShaderProgram::getUniformLocation(std::string name) const {
-        return glGetUniformLocation(id, name.c_str());
+        GL_CALL(int location = glGetUniformLocation(id, name.c_str()));
+        return location;
     }
 
-    ShaderProgram *ShaderProgram::fromShaderList(std::vector<Shader*>& shaders) {
-        GLuint id = linkShaderProgram(shaders);
-        return new ShaderProgram(id);
+    ShaderProgram *ShaderProgram::fromShaderList(const ShaderList& shaderList) {
+        GLuint id = linkShaderProgram(shaderList);
+        if (id) {
+            return new ShaderProgram(id);
+        }
+
+        LOG_CORE_ERROR("Failed to link shader program!");
+        return nullptr;
     }
 
-    GLuint ShaderProgram::linkShaderProgram(std::vector<Shader*>& shaders) {
+    GLuint ShaderProgram::linkShaderProgram(const ShaderList& shaderList) {
         GLuint program = glCreateProgram();
 
-        for (Shader* shader : shaders) {
+        for (Shader* shader : shaderList.getShaders()) {
             GL_CALL(glAttachShader(program, shader->id));
         }
 
         GL_CALL(glLinkProgram(program));
 
-        for (Shader* shader : shaders) {
+        for (Shader* shader : shaderList.getShaders()) {
             GL_CALL(glDetachShader(program, shader->id));
         }
 
@@ -55,8 +64,8 @@ namespace Engine {
 
             GL_CALL(glDeleteProgram(program));
 
-            LOG_CORE_ERROR("Linking shader program failed:");
-            LOG_CORE_ERROR("    {0}", infoLog.data());
+            LOG_CORE_ERROR("Linking shader program failed: ", infoLog.data());
+            std::cout << infoLog.data() << std::endl;
             return 0;
         }
 
