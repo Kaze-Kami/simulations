@@ -32,6 +32,8 @@ set(SRC
         src/core/renderer/shader_program/shader.cpp
         src/core/renderer/shader_program/shader_program.h
         src/core/renderer/shader_program/shader_program.cpp
+        src/core/renderer/shader_program/shader_list.cpp
+        src/core/renderer/shader_program/shader_list.h
         src/core/renderer/buffer/buffer.h
         src/core/renderer/vertex_array/vertex_array.h
         src/core/renderer/vertex_array/vertex_array_layout.h
@@ -46,6 +48,7 @@ set(SRC
         src/macros/debug.h
         src/macros/bind.h
         src/macros/gl_call.h
+        src/macros/no_op.h
 
         # platform/windows
         src/platform/glfw/impl_windows.cpp
