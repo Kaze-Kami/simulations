@@ -10,17 +10,26 @@
 #include "macros/gl_call.h"
 
 namespace Engine {
+    enum BufferType {
+        ARRAY_BUFFER=GL_ARRAY_BUFFER,
+        ELEMENT_ARRAY_BUFFER=GL_ELEMENT_ARRAY_BUFFER,
+        SHADER_STORAGE_BUFFER=GL_SHADER_STORAGE_BUFFER,
+    };
+    enum BufferAccess {
+        STATIC_DRAW=GL_STATIC_DRAW
+    };
+
     template<class T>
     class Buffer {
     public:
-        inline Buffer(GLenum type, GLenum access, int itemCount, const void* data)
-                : type(type), access(access), itemCount(itemCount), itemSize(sizeof(T)) {
+        inline Buffer(BufferType type, BufferAccess accessMode, int itemCount, const void* data)
+                : type(type), accessMode(accessMode), itemCount(itemCount), itemSize(sizeof(T)) {
             // create buffer
             GL_CALL(glCreateBuffers(1, &id));
 
             // buffer data
             bind();
-            GL_CALL(glBufferData(type, itemCount * itemSize, data, access));
+            GL_CALL(glBufferData(type, itemCount * itemSize, data, accessMode));
             unbind();
         }
 
@@ -28,38 +37,27 @@ namespace Engine {
             GL_CALL(glDeleteBuffers(1, &id));
         }
 
-        inline unsigned int getId() {
+        inline unsigned int getId() const {
             return id;
         }
 
         inline void bind() const {
             GL_CALL(glBindBuffer(type, id));
         }
-
         inline void unbind() const {
             GL_CALL(glBindBuffer(type, 0));
-        }
-
-        inline void bufferData(const void* data) {
-            CORE_ASSERT(bound(), "Buffer to be written to not bound!");
-            GL_CALL(glBufferSubData(type, 0, itemCount * itemSize, data));
-        }
-
-        inline void bufferSubData(int count, int startIndex, const void* data) {
-            CORE_ASSERT(bound(), "Buffer to be written to not bound!");
-            GL_CALL(glBufferSubData(type, startIndex * itemCount, count * itemSize, data));
         }
 
         inline bool bound() const {
             int binding = 0;
             switch (type) {
-                case GL_ARRAY_BUFFER:
+                case ARRAY_BUFFER:
                     binding = GL_ARRAY_BUFFER_BINDING;
                     break;
-                case GL_ELEMENT_ARRAY_BUFFER:
+                case ELEMENT_ARRAY_BUFFER:
                     binding = GL_ELEMENT_ARRAY_BUFFER_BINDING;
                     break;
-                case GL_SHADER_STORAGE_BUFFER:
+                case SHADER_STORAGE_BUFFER:
                     binding = GL_SHADER_STORAGE_BUFFER_BINDING;
                     break;
             };
@@ -71,8 +69,37 @@ namespace Engine {
             return activeId == id;
         }
 
+        inline void bindBase(const int index = 0) const {
+            CORE_ASSERT(bound(), "Buffer not bound!");
+            GL_CALL(glBindBufferBase(type, index, id));
+        }
+
+        inline void bufferData(const void* data) {
+            CORE_ASSERT(bound(), "Buffer not bound!");
+            GL_CALL(glBufferSubData(type, 0, itemCount * itemSize, data));
+        }
+        inline void bufferSubData(int count, int startIndex, const void* data) {
+            CORE_ASSERT(bound(), "Buffer not bound!");
+            GL_CALL(glBufferSubData(type, startIndex * itemCount, count * itemSize, data));
+        }
+
+        inline T* readData() const {
+            CORE_ASSERT(bound(), "Buffer not bound!");
+            void* ptr = glMapBuffer(type, GL_READ_ONLY);
+            if (ptr == nullptr) {
+                LOG_CORE_ERROR("Mapping buffer for read failed!");
+                return nullptr;
+            }
+            T* arr = new T[itemCount];
+            memcpy(arr, ptr, sizeof(T) * itemCount);
+            bool unmapSuccess = glUnmapBuffer(type);
+            ASSERT(unmapSuccess, "Unmapping buffer failed!");
+            return arr;
+        }
+
     private:
-        GLenum type, access;
+        BufferType type;
+        BufferAccess accessMode;
         int itemCount, itemSize;
         unsigned int id;
     };
