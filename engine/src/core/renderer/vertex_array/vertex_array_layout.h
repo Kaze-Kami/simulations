@@ -11,14 +11,6 @@
 
 namespace Engine {
 
-    template<class T>
-    class VertexBuffer : public Buffer<T> {
-    public:
-        inline VertexBuffer(GLenum access, int itemCount, const void* data)
-                : Buffer<T>(GL_ARRAY_BUFFER, access, itemCount, data) {}
-    };
-
-
     struct VertexBufferLayoutAttribute {
         // GLuint index; => carried by the layout
         // GLsizei stride; => carried by the layout

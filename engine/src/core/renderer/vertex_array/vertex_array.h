@@ -22,9 +22,9 @@ namespace Engine {
         }
 
         template<class T>
-        inline void addBuffer(VertexBuffer<T>* buffer, VertexBufferLayout& layout) {
-            CORE_ASSERT(bound(), "");
-            CORE_ASSERT(buffer->bound(), "");
+        inline void addBuffer(Buffer<T>* buffer, VertexBufferLayout& layout) {
+            CORE_ASSERT(bound(), "Vertex array must be bound to add buffers!");
+            CORE_ASSERT(buffer->bound(), "Buffer must be bound to be added to vertex array!");
 
             const auto& attributes = layout.getAttributes();
             unsigned int offset = 0;
@@ -36,15 +36,15 @@ namespace Engine {
             }
         }
 
-        inline void bind() {
+        inline void bind() const {
             GL_CALL(glBindVertexArray(id));
         }
 
-        inline void unbind() {
+        inline void unbind() const {
             GL_CALL(glBindVertexArray(0));
         }
 
-        inline bool bound() {
+        inline bool bound() const {
             int activeId;
             GL_CALL(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &activeId));
             return id == activeId;
