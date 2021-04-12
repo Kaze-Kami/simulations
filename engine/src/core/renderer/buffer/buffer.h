@@ -28,11 +28,15 @@ namespace Engine {
             GL_CALL(glDeleteBuffers(1, &id));
         }
 
-        inline void bind() {
+        inline unsigned int getId() {
+            return id;
+        }
+
+        inline void bind() const {
             GL_CALL(glBindBuffer(type, id));
         }
 
-        inline void unbind() {
+        inline void unbind() const {
             GL_CALL(glBindBuffer(type, 0));
         }
 
@@ -46,15 +50,24 @@ namespace Engine {
             GL_CALL(glBufferSubData(type, startIndex * itemCount, count * itemSize, data));
         }
 
-        inline bool bound() {
-            //! todo: when using a new kind of buffer ensure that
-            //! GL_[BUFFER_TYPE] +2 == GL_[BUFFER_TYPE]_BINDING
-            //! todo: holds true ;; checked:
-            //! - GL_ARRAY_BUFFER
-            //! - GL_ELEMENT_ARRAY_BUFFER
+        inline bool bound() const {
+            int binding = 0;
+            switch (type) {
+                case GL_ARRAY_BUFFER:
+                    binding = GL_ARRAY_BUFFER_BINDING;
+                    break;
+                case GL_ELEMENT_ARRAY_BUFFER:
+                    binding = GL_ELEMENT_ARRAY_BUFFER_BINDING;
+                    break;
+                case GL_SHADER_STORAGE_BUFFER:
+                    binding = GL_SHADER_STORAGE_BUFFER_BINDING;
+                    break;
+            };
+
+            CORE_ASSERT(binding != 0, "Unknown buffer type");
 
             int activeId;
-            GL_CALL(glGetIntegerv(type + 2, &activeId));
+            GL_CALL(glGetIntegerv(binding, &activeId));
             return activeId == id;
         }
 
