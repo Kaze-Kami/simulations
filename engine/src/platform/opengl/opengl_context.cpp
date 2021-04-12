@@ -122,11 +122,11 @@ namespace Engine {
         }
     }
 
-    void OpenGlContext::clear(float r, float g, float b, float a) {
+    void OpenGlContext::clear(float r, float g, float b, float a, unsigned int flags) {
         CORE_ASSERT(bound, "Calling context functions on unbound context!");
         CORE_ASSERT(std::this_thread::get_id() == contextThreadId, "Calling context functions from unbound thread id!");
         GL_CALL(glClearColor(r, g, b, a));
-        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+        GL_CALL(glClear(flags));
     }
 
 }

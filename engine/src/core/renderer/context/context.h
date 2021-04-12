@@ -28,10 +28,10 @@ namespace Engine {
         virtual void setMultisample(bool enable) = 0;
 
         // opengl util
-        virtual void clear(float r, float g, float b, float a) = 0;
-        inline virtual void clear(glm::vec4 color) { clear(color.r, color.g, color.b, color.a); };
-        inline virtual void clear(glm::vec3 color) { clear(color.r, color.g, color.b, 1.f); }
-        inline virtual void clear(float r, float g, float b) { clear(r, g, b, 1.f); };
+        virtual void clear(float r, float g, float b, float a, unsigned int flags = 0) = 0;
+        inline virtual void clear(glm::vec3 color, unsigned int flags = 0) { clear(color.r, color.g, color.b, 1.f, flags); }
+        inline virtual void clear(glm::vec4 color, unsigned int flags = 0) { clear(color.r, color.g, color.b, color.a, flags); };
+        inline virtual void clear(float r, float g, float b, unsigned int flags = 0) { clear(r, g, b, 1.f, flags); };
 
         // not used yet, but interesting for the future
         inline virtual void beginFrame() {}
