@@ -12,11 +12,10 @@
 #if defined(_BUILD_RELEASE)
 #define GL_CALL(x) x;
 #else
-#define GL_CALL(x) { \
+#define GL_CALL(x) \
     ::Engine::internal::glClearErrors(); \
     x; \
-    ::Engine::internal::glLogCall(__FILE__, __LINE__); \
-}
+    ::Engine::internal::glLogCall(__FILE__, __LINE__);
 #endif
 
 namespace Engine::internal {
