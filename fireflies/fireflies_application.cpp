@@ -6,32 +6,6 @@
 
 #include <glm/gtx/color_space.hpp>
 
-const char* vertexShaderCode =
-        "#version 450 core\n"
-        /* inputs */
-        "layout (location = 0) in vec2 i_position;"
-        "layout (location = 1) in vec3 i_color;"
-        /* outputs */
-        "layout (location = 0) out vec3 o_color;"
-        /* main */
-        "void main() {"
-        "    o_color = i_color;"
-        "    gl_Position = vec4(i_position, 0.f, 1.f);"
-        "}";
-
-const char* fragmentShaderCode =
-        "#version 450 core\n"
-        /* inputs */
-        "layout (location = 0) in vec3 i_color;"
-        /* outputs */
-        "layout (location = 0) out vec3 o_color;"
-        /* main */
-        "void main() {"
-        "    o_color = i_color;"
-        "}";
-
-const char* computeShaderCode = "";
-
 static float rnd(float min, float max) {
     return min + ((float) rand() / (RAND_MAX)) * (max - min);
 }
@@ -47,18 +21,19 @@ void FirefliesApplication::onContextAttach() {
      */
 
     // load shaders
-    std::vector<Shader*> shaders;
-    shaders.push_back(Shader::fromString(ShaderType::VERTEX, vertexShaderCode));
-    shaders.push_back(Shader::fromString(ShaderType::FRAGMENT, fragmentShaderCode));
+    ShaderList shaderList;
+    shaderList.pushFromFile(
+            ShaderType::VERTEX,
+            R"(C:\Development\Projects\simulations\fireflies\resources\vertex_shader.glsl)"
+    );
+    shaderList.pushFromFile(
+            ShaderType::FRAGMENT,
+            R"(C:\Development\Projects\simulations\fireflies\resources\fragment_shader.glsl)"
+    );
 
     // create shader program
-    shaderProgram = ShaderProgram::fromShaderList(shaders);
-
-    // delete shader code
-    for (Shader* shader : shaders) {
-        delete shader;
-    }
-    shaders.clear();
+    shaderProgram = ShaderProgram::fromShaderList(shaderList);
+    shaderList.clear();
 
     // create vertex array
     vertexArray = new VertexArray();
@@ -69,7 +44,7 @@ void FirefliesApplication::onContextAttach() {
     layout.pushAttribute<float>(3, false);
 
     // create vertex buffer
-    vertexBuffer = new VertexBuffer<FireflyVertex>(GL_DYNAMIC_DRAW, nFireflies * 4, nullptr);
+    vertexBuffer = new Buffer<FireflyVertex>(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, nFireflies, nullptr);
     vertexBuffer->bind();
 
     // add vertex buffer to vertex array
@@ -122,9 +97,9 @@ void FirefliesApplication::setup(Engine::ApplicationProps& props) {
 
     glm::vec2 vertexPositions[4] = {
             glm::vec2(-1.f, -1.f),
-            glm::vec2( 1.f, -1.f),
-            glm::vec2( 1.f,  1.f),
-            glm::vec2(-1.f,  1.f),
+            glm::vec2(1.f, -1.f),
+            glm::vec2(1.f, 1.f),
+            glm::vec2(-1.f, 1.f),
     };
 
     // init data arrays
@@ -154,8 +129,6 @@ void FirefliesApplication::setup(Engine::ApplicationProps& props) {
 void FirefliesApplication::update(float dt) {
     // update time
     phi = glm::mod(phi + omega * dt, phiMax);
-
-    // update fireflies (todo: compute shader)
 
     for (int i = 0; i < nFireflies; i++) {
         Firefly& fA = fireflies[i];
