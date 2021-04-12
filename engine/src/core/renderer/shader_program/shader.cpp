@@ -4,6 +4,10 @@
 
 
 #include "shader.h"
+
+#include <fstream>
+#include <iostream>
+
 #include "macros/gl_call.h"
 
 namespace Engine {
@@ -19,7 +23,7 @@ namespace Engine {
         if (id) {
             return new Shader(type, id);
         }
-        LOG_CORE_ERROR("Failed to compile shader", type);
+        LOG_CORE_ERROR("Failed to compile shader {:x}", type);
         return nullptr;
     }
 
@@ -41,14 +45,37 @@ namespace Engine {
             GL_CALL(glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]));
 
             GL_CALL(glDeleteShader(shader));
-            LOG_CORE_ERROR("Compiling shader failed:");
-            LOG_CORE_ERROR("    {0}", infoLog.data());
+            LOG_CORE_ERROR("Compiling shader failed: ", infoLog.data());
+            std::cout << infoLog.data() << std::endl;
 
             // failed
             return 0;
         }
 
         return shader;
+    }
+
+    static std::string readFileAsString(const std::string& filepath) {
+        std::string result;
+        std::ifstream in(filepath, std::ios::in | std::ios::binary);
+        if (in)
+        {
+            in.seekg(0, std::ios::end);
+            result.resize((size_t)in.tellg());
+            in.seekg(0, std::ios::beg);
+            in.read(&result[0], result.size());
+            in.close();
+        }
+        else
+        {
+            LOG_CORE_ERROR("Could not open file '{}'", filepath);
+        }
+
+        return result;
+    }
+
+    Shader* Shader::fromFile(ShaderType type, const std::string& filePath) {
+        return Shader::fromString(type, readFileAsString(filePath));
     }
 
 }
