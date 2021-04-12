@@ -16,7 +16,8 @@ namespace Engine {
         SHADER_STORAGE_BUFFER=GL_SHADER_STORAGE_BUFFER,
     };
     enum BufferAccess {
-        STATIC_DRAW=GL_STATIC_DRAW
+        STATIC_DRAW=GL_STATIC_DRAW,
+        DYNAMIC_DRAW=GL_DYNAMIC_DRAW,
     };
 
     template<class T>
@@ -83,14 +84,14 @@ namespace Engine {
             GL_CALL(glBufferSubData(type, startIndex * itemCount, count * itemSize, data));
         }
 
-        inline T* readData() const {
+        inline T* readData(T* out = nullptr) const {
             CORE_ASSERT(bound(), "Buffer not bound!");
             void* ptr = glMapBuffer(type, GL_READ_ONLY);
             if (ptr == nullptr) {
                 LOG_CORE_ERROR("Mapping buffer for read failed!");
                 return nullptr;
             }
-            T* arr = new T[itemCount];
+            T* arr = out == nullptr ? new T[itemCount] : out;
             memcpy(arr, ptr, sizeof(T) * itemCount);
             bool unmapSuccess = glUnmapBuffer(type);
             ASSERT(unmapSuccess, "Unmapping buffer failed!");

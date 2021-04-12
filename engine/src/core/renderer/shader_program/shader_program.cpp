@@ -26,6 +26,7 @@ namespace Engine {
 
     int ShaderProgram::getUniformLocation(std::string name) const {
         GL_CALL(int location = glGetUniformLocation(id, name.c_str()));
+        if (location == -1) LOG_CORE_WARN("Can not fetch uniform location for uniform {} in shader program {}", name, id);
         return location;
     }
 
