@@ -12,20 +12,19 @@
 
 #include <core/application/application.h>
 #include <core/renderer/shader_program/shader_program.h>
+#include <core/renderer/buffer/buffer.h>
 
 using namespace Engine;
 
-// this needs to 'fit' into std430 buffer format -> todo: figure out padding...
-// padding should be [4 float][4 float] for vecX and [1 float] for floats
-struct _Firefly {
+struct FireflyData {
     glm::vec2 position;
-    float _p2 = 0, _p3 = 0; // match 4x padding (vec2 + 2 float)
+    float _p3 = 0, _p4 = 0;         // padding
 
     glm::vec3 color;
-    float _c3 = 0;              // match 4x padding (vec3 + float)
 
-    float phase, frequency, phi, size;
-    float dPhase, dFrequency, dPhi = 0, _d2 = 0;
+    float size;
+    float phi, frequency;
+    float nudgePhi = 0, nudgeFrequency = 0;
 };
 
 class FirefliesCsApplication : public Application {
@@ -53,22 +52,35 @@ protected:
 
 
 private:
-    /* const config;; todo: put this somewhere */
-    static constexpr int NUM_FIREFLIES = 10000;
-    static constexpr int NUM_COLORS = 5;
+    /* constants */
     static constexpr float TWO_PI = glm::radians(360.f);
+
+    /* todo: put this somewhere (aka get your ass up and add imgui support lol)*/
+
+    // general config
+    static constexpr int NUM_FIREFLIES = 5000;
+    static constexpr int NUM_COLORS = 5;
+    static constexpr float SIMULATION_SPEED = 1.f;
+
     static constexpr float FIREFLY_SIZE = .002f;
-    static constexpr float FIREFLY_MAX_FREQUENCY = 1.5f;
     static constexpr float FIREFLY_MAX_PHASE = TWO_PI;
-    static constexpr float                                        // phi(t+dt) = (phi(t) + omega * dt) % phiMax
-            FREQUENCY = 1.f,                                      // the speed of or simulation (number of ticks per second)
-            OMEGA = FREQUENCY * TWO_PI;                           // update frequency matched to once per second
+    static constexpr float FIREFLY_MAX_FREQUENCY = 1.5f;
+
+    static constexpr float
+            muP = 1.f,              // how much nearby fireflies phase effect a 'this' firefly
+            muF = 1.f,              // how much nearby fireflies frequency effect a 'this' firefly
+            epsilonV = 15.f,        // how 'fast' a fireflies vision 'decays'
+            epsilonC = 20.f;        // how less 'interesting' different colors are
+
+    // internal
+    static constexpr float OMEGA = SIMULATION_SPEED * TWO_PI;
 
     /* Opengl */
     ShaderProgram* renderShader = nullptr;
     ShaderProgram* computeShader = nullptr;
-    GLuint computeBufferId = 0;
-    int csDPhiLocation = 0, rsDPhiLocation = 0;
+    Buffer<FireflyData>* computeBuffer;
+
+    int rsDPhiLocation = 0;
 };
 
 

@@ -7,26 +7,7 @@
 #include <random>
 #include <chrono>
 #include <glm/gtx/color_space.hpp>
-
-#include <macros/gl_call.h>
-#include <macros/assert.h>
-#include <macros/no_op.h>
 #include <core/logging/app_log.h>
-
-/** Helpers */
-
-template<class T>
-T* readBuffer(GLenum target, GLuint location, int size) {
-    GL_CALL(glBindBuffer(target, location));
-    GL_CALL(void* ptr = glMapBuffer(target, GL_READ_ONLY));
-    ASSERT(ptr != nullptr, "Mapping buffer failed!");
-    T* arr = new T[size];
-    memcpy(arr, ptr, sizeof(T) * size);
-    GL_CALL(bool unmapSuccess = glUnmapBuffer(target));
-    ASSERT(unmapSuccess, "Unmapping buffer failed!");
-    GL_CALL(glBindBuffer(target, 0));
-    return arr;
-}
 
 /** Class implementation */
 
@@ -52,12 +33,15 @@ void FirefliesCsApplication::setup(ApplicationProps& props) {
     windowProps.height = 1000;
     windowProps.center = true;
     windowProps.multisample = 16;
+
+    /* log some stats */
+    LOG_INFO("Num fireflies: {}", NUM_FIREFLIES);
 }
 
 void FirefliesCsApplication::onContextAttach() {
     /** init data */
     //! use heap (stack is not big enough if we want a lot of fireflies!)
-    _Firefly* fireflies = new _Firefly[NUM_FIREFLIES];
+    FireflyData* fireflies = new FireflyData[NUM_FIREFLIES];
 
     // fill arrays
     std::mt19937 engine;
@@ -87,26 +71,26 @@ void FirefliesCsApplication::onContextAttach() {
         glm::vec2 position = glm::vec2(x, y);
 
         // init firefly data
-        _Firefly& firefly = fireflies[i];
-        firefly.phase = phase;
-        firefly.frequency = frequency;
-        firefly.phi = 0;
-        firefly.size = size;
-        firefly.dPhase = 0;
-        firefly.dFrequency = 0;
-        firefly.dPhi = 0;
-        firefly.position = position;
-        firefly.color = color;
+        FireflyData& f = fireflies[i];
+        f.position = position;
+        f.color = color;
+        f.size = size;
+        f.phi = phase;
+        f.frequency = frequency;
     }
 
     /** init opengl buffers and vertex array */
 
     // gen and init compute buffer
-    GL_CALL(glCreateBuffers(1, &computeBufferId));
-    GL_CALL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeBufferId));
-    GL_CALL(glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(_Firefly) * NUM_FIREFLIES, fireflies, GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, computeBufferId));
-    GL_CALL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+    computeBuffer = new Buffer<FireflyData>(
+            BufferType::SHADER_STORAGE_BUFFER,
+            BufferAccess::STATIC_DRAW,
+            NUM_FIREFLIES,
+            fireflies
+    );
+    computeBuffer->bind();
+    computeBuffer->bindBase();
+    computeBuffer->unbind();
 
     // our data arrays are not needed anymore now
     delete[] fireflies;
@@ -118,7 +102,7 @@ void FirefliesCsApplication::onContextAttach() {
     shaderList.pushFromFile(
             ShaderType::VERTEX,
             R"(C:\Development\Projects\simulations\fireflies_cs\resources\vertex_shader.glsl)"
-            );
+    );
     shaderList.pushFromFile(
             ShaderType::GEOMETRY,
             R"(C:\Development\Projects\simulations\fireflies_cs\resources\geometry_shader.glsl)"
@@ -130,9 +114,13 @@ void FirefliesCsApplication::onContextAttach() {
     renderShader = ShaderProgram::fromShaderList(shaderList);
     shaderList.clear();
 
+    /* push uniforms */
     renderShader->bind();
+    GL_CALL(glUniform1f(renderShader->getUniformLocation("muP"), muP));
+    GL_CALL(glUniform1f(renderShader->getUniformLocation("muF"), muF));
+
+    // fetch dPhi location
     rsDPhiLocation = renderShader->getUniformLocation("dPhi");
-    ASSERT(rsDPhiLocation != -1, "Can't fetch location for uniform 'dPhi' from vertex shader");
     renderShader->unbind();
 
     // change compute shader
@@ -143,10 +131,10 @@ void FirefliesCsApplication::onContextAttach() {
     computeShader = ShaderProgram::fromShaderList(shaderList);
     shaderList.clear();
 
-    // fetch dPhi location
+    /* push uniforms */
     computeShader->bind();
-    csDPhiLocation = computeShader->getUniformLocation("dPhi");
-    ASSERT(csDPhiLocation != -1, "Can't fetch location for uniform 'dPhi' from compute shader");
+    GL_CALL(glUniform1f(computeShader->getUniformLocation("epsilonV"), epsilonV));
+    GL_CALL(glUniform1f(computeShader->getUniformLocation("epsilonC"), epsilonC));
     computeShader->unbind();
 
     // set blend
@@ -169,8 +157,6 @@ void FirefliesCsApplication::update(float dt) {
 
     /* calculate change */
     computeShader->bind();
-    // push dPhi
-    GL_CALL(glUniform1f(csDPhiLocation, dPhi));
     // calculate change
     GL_CALL(glDispatchCompute(NUM_FIREFLIES, 1, 1));
     // wait for completion
@@ -179,43 +165,34 @@ void FirefliesCsApplication::update(float dt) {
 
 #if 0
     /* for testing: map buffers so we can read them */
-    _Firefly* cb = readBuffer<_Firefly>(GL_SHADER_STORAGE_BUFFER, computeBufferId, NUM_FIREFLIES);
-    _FireflyVertex* vb = readBuffer<_FireflyVertex>(GL_SHADER_STORAGE_BUFFER, vertexBufferId, 4 * NUM_FIREFLIES);
-    NO_OP;
+    computeBuffer->bind();
+    FireflyData* cb = computeBuffer->readData();
+    computeBuffer->unbind();
 
     // calculate avg phase, frequency and clock
-    float avgPhase = 0;
     float avgFrequency = 0;
-    float avgPhi = 0;
+    float avgPhase = 0;
     for (int i = 0; i < NUM_FIREFLIES; i++) {
-        const _Firefly& f = cb[i];
-        avgPhase += f.phase;
+        const FireflyData& f = cb[i];
         avgFrequency += f.frequency;
-        avgPhi += f.phi;
+        avgPhase += f.phi;
     }
-    avgPhase /= NUM_FIREFLIES;
     avgFrequency /= NUM_FIREFLIES;
-    avgPhi /= NUM_FIREFLIES;
+    avgPhase /= NUM_FIREFLIES;
 
-    float phaseDev = 0;
     float frequencyDev = 0;
-    float phiDev = 0;
+    float phaseDev = 0;
 
     for (int i = 0; i < NUM_FIREFLIES; i++) {
-        const _Firefly& f = cb[i];
-        phaseDev += glm::abs(avgPhase - f.phase);
+        const FireflyData& f = cb[i];
         frequencyDev += glm::abs(avgFrequency - f.frequency);
-        phiDev += glm::atan(glm::sin(avgPhi - f.phi), glm::cos(avgPhi - f.phi));
+        phaseDev += glm::atan(glm::sin(avgPhase - f.phi), glm::cos(avgPhase - f.phi));
     }
 
-    phaseDev /= NUM_FIREFLIES;
     frequencyDev /= NUM_FIREFLIES;
-    phiDev /= NUM_FIREFLIES;
-
-    LOG_INFO("phaseDev={}, frequencyDev={}, phiDev={}", phaseDev, frequencyDev, phiDev);
+    phaseDev /= NUM_FIREFLIES;
 
     delete[] cb;
-    delete[] vb;
 #endif
 }
 
