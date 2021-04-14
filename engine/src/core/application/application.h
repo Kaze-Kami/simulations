@@ -26,11 +26,13 @@ namespace Engine {
         virtual void init();
         virtual void shutdown();
 
-        virtual void onContextAttach();
-        virtual void onContextDetach();
+        virtual void onContextAttach(Context* context);
+        virtual void onContextDetach(Context* context);
 
         void run();
         void stop();
+
+        Window* getWindow();
 
         static Application* get();
         static Application* createApplication();
@@ -39,11 +41,10 @@ namespace Engine {
         inline virtual void setup(ApplicationProps& props) {};  // todo: improve naming
         inline virtual void update(float dt) {}
         inline virtual void render(Context* context) {}
-
-        MessageQueue messageQueue;
+        inline virtual void onEvent(Event* e) {}
 
     private:
-        void dispatchEvent(Event* e);
+        virtual void dispatchEvent(Event* e);
         void renderLoop();
 
         bool onWindowViewportChangeEvent(WindowViewportChangeEvent* e);
@@ -53,7 +54,7 @@ namespace Engine {
         float lastFrameTime = 0;
         Window* window = nullptr;
         std::thread* renderThread = nullptr;
-        std::mutex windowMutex;
+        MessageQueue messageQueue;
 
         static Application* instance;
     };

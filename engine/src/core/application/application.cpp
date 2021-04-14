@@ -8,6 +8,7 @@
 #include "application.h"
 #include "macros/assert.h"
 #include "macros/bind.h"
+
 #include "core/logging/engine_log.h"
 
 namespace Engine {
@@ -36,9 +37,9 @@ namespace Engine {
         delete window;
     }
 
-    void Application::onContextAttach() {}
+    void Application::onContextAttach(Context* context) {}
 
-    void Application::onContextDetach() {}
+    void Application::onContextDetach(Context* context) {}
 
     void Application::run() {
         CORE_ASSERT(initialized, "Application not initialized!");
@@ -66,17 +67,19 @@ namespace Engine {
         running = false;
     }
 
-    void Application::renderLoop() {
-        // 'Worker' thread:
-        // - Update
-        // - Render
-        // - Swap buffers
+    Window* Application::getWindow() {
+        return window;
+    }
 
+    void Application::renderLoop() {
         Context* context = window->getContext();
         context->bind();
-        onContextAttach();
+        onContextAttach(context);
 
         lastFrameTime = (float) glfwGetTime();
+
+        double sumSwapDuration = 0;
+        long swaps = 0;
 
         while (running) {
             // poll events
@@ -93,14 +96,21 @@ namespace Engine {
             render(context);
             context->endFrame();
 
-            windowMutex.lock();
-            if (running) {
-                context->swapBuffers();
-            }
-            windowMutex.unlock();
+            //! todo: change to instrumentor
+            auto start = std::chrono::high_resolution_clock::now();
+            context->swapBuffers();
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = end - start;
+            sumSwapDuration += elapsed.count();
+            swaps ++;
         }
-        onContextDetach();
+        onContextDetach(context);
         context->unbind();
+
+        //! todo: change to instrumentor
+        const double avgSwapDuration = sumSwapDuration / swaps;
+        const double avgFrameRate = 1.f / avgSwapDuration;
+        LOG_CORE_INFO("Avg swap duration: {:.6f} ms ({:.2f} fps)", avgSwapDuration * 1e3, avgFrameRate);
     }
 
     bool Application::onWindowViewportChangeEvent(WindowViewportChangeEvent* e) {
@@ -111,9 +121,9 @@ namespace Engine {
 
     bool Application::onWindowCloseEvent(WindowCloseEvent*) {
         // stop execution
-        windowMutex.lock();
+        // windowMutex.lock();
         running = false;
-        windowMutex.unlock();
+        // windowMutex.unlock();
 
         return true;
     }
@@ -122,6 +132,10 @@ namespace Engine {
         EventDispatcher dispatcher(e);
         dispatcher.dispatch<WindowCloseEvent>(BIND_FN(Application::onWindowCloseEvent));
         dispatcher.dispatch<WindowViewportChangeEvent>(BIND_FN(Application::onWindowViewportChangeEvent));
+
+        if (!e->handled) {
+            onEvent(e);
+        }
     }
 
     Application* Application::get() {

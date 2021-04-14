@@ -41,7 +41,8 @@ namespace Engine {
         void setViewport(int x0, int y0, int width, int height) override;
         void setMultisample(bool enable) override;
 
-        void clear(float r, float g, float b, float a, unsigned int flags) override;
+        void setClearColor(float r, float g, float b, float a) override;
+        void clear(unsigned int flags) override;
 
     private:
         std::thread::id contextThreadId;
