@@ -14,6 +14,7 @@ namespace Engine {
     enum class EventType {
         None = 0,
         WindowClose, WindowResize, WindowMove, ViewportChange,
+        MouseMove, MouseButtonPress, MouseButtonRelease, MouseWheelScroll,
     };
 
 #define EVENT_CLASS_TYPE(type) inline static EventType getStaticType() { return EventType::type; } \
