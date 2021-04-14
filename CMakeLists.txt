@@ -17,9 +17,4 @@ add_subdirectory(sandbox)
 # ################################################################# #
 #                            Projects                               #
 # ################################################################# #
-
-# firefly simulation
-add_subdirectory(fireflies)
-
-# firefly simulation with compute shader
-add_subdirectory(fireflies_cs)
+add_subdirectory(projects)
