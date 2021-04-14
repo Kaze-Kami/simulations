@@ -16,6 +16,8 @@ set(SRC
         # core/events
         src/core/events/event.h
         src/core/events/window_events.h
+        src/core/events/mouse_events.h
+        src/core/events/key_events.h
 
         # core/logging
         src/core/logging/logger.h
@@ -41,6 +43,11 @@ set(SRC
         # core/window
         src/core/window/window.h
         src/core/window/window_props.h
+        src/core/window/input_controller.h
+
+        # core/instrumentor
+        src/core/instrumentor/instrumentor.cpp
+        src/core/instrumentor/instrumentor.h
 
         # macros
         src/macros/definitions.h
@@ -49,11 +56,15 @@ set(SRC
         src/macros/bind.h
         src/macros/gl_call.h
         src/macros/no_op.h
+        src/macros/timing.h
 
-        # platform/windows
+        # platform/glfw
         src/platform/glfw/impl_windows.cpp
         src/platform/glfw/glfw_window.h
         src/platform/glfw/glfw_window.cpp
+        src/platform/glfw/glfw_input_controller.cpp
+        src/platform/glfw/glfw_input_controller.h
+
         # platform/opengl
         src/platform/opengl/impl_opengl.cpp
         src/platform/opengl/opengl_context.h
