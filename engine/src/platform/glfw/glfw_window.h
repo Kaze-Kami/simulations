@@ -10,24 +10,25 @@
 #include "core/window/window.h"
 #include "core/events/event.h"
 
+#include "glfw_input_controller.h"
+
 namespace Engine {
 
     namespace internal::glfw {
         void setWindowHint(int name, bool enable);
     }
 
-    class WindowsWindow : public Window {
+    class GlfwWindow : public Window {
     public:
-        explicit WindowsWindow(const WindowProps& props, MessageQueue* messageQueue);
+        explicit GlfwWindow(const WindowProps& props, MessageQueue* messageQueue);
 
-        virtual ~WindowsWindow();
+        virtual ~GlfwWindow();
 
         void swapBuffers() override;
 
         void setVsync(bool enable) override;
 
         void pollEvents() override;
-
         void waitEvents() override;
 
         void* getProcAddressFun() override;
@@ -35,8 +36,14 @@ namespace Engine {
 
         Context* getContext() override;
 
+        float getWidth() override;
+        float getHeight() override;
+
+        InputController* getInput() override;
+
     private:
         GLFWwindow* window = nullptr;
+        GlfwInputController* inputController;
 
         struct WindowData {
             int width = 0, height = 0, posX = 0, posY = 0;

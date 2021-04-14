@@ -10,6 +10,7 @@
 #include "macros/gl_call.h"
 #include "core/logging/engine_log.h"
 #include "core/events/window_events.h"
+#include "core/events/mouse_events.h"
 
 namespace Engine {
 
@@ -28,20 +29,20 @@ namespace Engine {
         }
     }
 
-    WindowsWindow::WindowsWindow(const WindowProps &props, MessageQueue* messageQueue) {
+    GlfwWindow::GlfwWindow(const WindowProps &props, MessageQueue* messageQueue) {
         data.messageQueue = messageQueue;
         init(props);
     }
 
-    WindowsWindow::~WindowsWindow() {
+    GlfwWindow::~GlfwWindow() {
         shutdown();
     }
 
-    void WindowsWindow::swapBuffers() {
+    void GlfwWindow::swapBuffers() {
         glfwSwapBuffers(window);
     }
 
-    void WindowsWindow::setVsync(bool enable) {
+    void GlfwWindow::setVsync(bool enable) {
         if (enable) {
             glfwSwapInterval(1);
         } else {
@@ -49,27 +50,27 @@ namespace Engine {
         }
     }
 
-    void WindowsWindow::pollEvents() {
+    void GlfwWindow::pollEvents() {
         glfwPollEvents();
     }
 
-    void WindowsWindow::waitEvents() {
+    void GlfwWindow::waitEvents() {
         glfwWaitEvents();
     }
 
-    void* WindowsWindow::getProcAddressFun() {
+    void* GlfwWindow::getProcAddressFun() {
         return (void*) glfwGetProcAddress;
     }
 
-    void WindowsWindow::makeContextCurrent() {
+    void GlfwWindow::makeContextCurrent() {
         glfwMakeContextCurrent(window);
     }
 
-    Context* WindowsWindow::getContext() {
+    Context* GlfwWindow::getContext() {
         return data.context;
     }
 
-    void WindowsWindow::init(const WindowProps& props) {
+    void GlfwWindow::init(const WindowProps& props) {
         using namespace internal::glfw;
 
         if (!glfwInitialized) {
@@ -119,9 +120,10 @@ namespace Engine {
         setWindowHint(GLFW_FOCUS_ON_SHOW, props.focused);
         setWindowHint(GLFW_RESIZABLE, props.resizable);
 
-
         window = glfwCreateWindow(data.width, data.height, props.name.c_str(), data.monitor, nullptr);
         CORE_ASSERT(window, "Could not create GLFW Window!");
+
+        inputController = new GlfwInputController(window);
 
         if (!props.fullscreen) {
             glfwSetWindowPos(window, data.posX, data.posY);
@@ -146,14 +148,7 @@ namespace Engine {
         glfwSetWindowUserPointer(window, &data);
 
 
-        // set callbacks window
-        /*
-        glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
-            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-            data.messageQueue->dispatchImmediately(new WindowRefreshEvent());
-        });
-        */
-
+        // set window callbacks
         glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -182,15 +177,61 @@ namespace Engine {
             data.messageQueue->dispatch(new WindowViewportChangeEvent(0, 0, data.vpWidth, data.vpHeight));
         });
 
+        glfwSetCursorPosCallback(window, [](GLFWwindow* window, double posX,double posY) {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            glm::vec2 globalPosition = glm::vec2(float(posX), float(posY));
+            glm::vec2 localPosition = -1.f + globalPosition / glm::vec2(data.width, data.height) * 2.f;
+            //! invert y axis
+            localPosition.y *= -1;
+
+            data.messageQueue->dispatch(new MouseMoveEvent(localPosition, globalPosition));
+        });
+
+        // set mouse callbacks
+        glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            glm::vec2 globalPosition = glm::vec2(float(x), float(y));
+            glm::vec2 localPosition = -1.f + globalPosition / glm::vec2(data.width, data.height) * 2.f;
+            //! invert y axis
+            localPosition.y *= -1;
+
+            if (action == GLFW_PRESS) {
+                data.messageQueue->dispatch(new MouseButtonPressEvent(button, localPosition, globalPosition));
+            } else {
+                data.messageQueue->dispatch(new MouseButtonReleaseEvent(button, localPosition, globalPosition));
+            }
+        });
+
+        glfwSetScrollCallback(window, [](GLFWwindow* window, double offsetX, double offsetY) {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            data.messageQueue->dispatch(new MouseWheelScrollEvent(float(offsetX), float(offsetY)));
+        });
+
+        // set key callbacks
+
         // show window
         glfwShowWindow(window);
     }
 
-    void WindowsWindow::shutdown() {
+    void GlfwWindow::shutdown() {
         using namespace internal::glfw;
         delete data.context;
         glfwTerminate();
         glfwInitialized = false;
+    }
+
+    float GlfwWindow::getWidth() {
+        return data.width;
+    }
+
+    float GlfwWindow::getHeight() {
+        return data.height;
+    }
+
+    InputController* GlfwWindow::getInput() {
+        return inputController;
     }
 
 }

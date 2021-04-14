@@ -9,7 +9,7 @@
 namespace Engine {
 
     Window* Window::create(const WindowProps& props, MessageQueue* messageQueue) {
-        return new WindowsWindow(props, messageQueue);
+        return new GlfwWindow(props, messageQueue);
     }
 
 }
