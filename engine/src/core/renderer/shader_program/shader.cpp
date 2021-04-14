@@ -12,6 +12,25 @@
 
 namespace Engine {
 
+    static std::string typeToName(ShaderType type) {
+        std::string name;
+        switch(type) {
+            case VERTEX:
+                name = "vertex";
+                break;
+            case GEOMETRY:
+                name = "geometry";
+                break;
+            case FRAGMENT:
+                name = "fragment";
+                break;
+            case COMPUTE:
+                name = "compute";
+                break;
+        }
+        return name;
+    }
+
     Shader::Shader(ShaderType type, GLint id) : type(type), id(id) {}
 
     Shader::~Shader() {
@@ -23,7 +42,7 @@ namespace Engine {
         if (id) {
             return new Shader(type, id);
         }
-        LOG_CORE_ERROR("Failed to compile shader {:x}", type);
+        LOG_CORE_ERROR("Failed to compile {} shader", typeToName(type));
         return nullptr;
     }
 
