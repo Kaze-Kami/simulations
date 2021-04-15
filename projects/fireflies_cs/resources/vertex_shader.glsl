@@ -14,15 +14,15 @@ layout (std430, binding = 0) buffer FireflyBufferLayout {
     Firefly fireflies[];
 };
 
-uniform float dPhi;
-
-uniform float muP;
-uniform float muF;
-
 layout (location = 0) out vec2 o_position;
 layout (location = 1) out vec3 o_color;
 layout (location = 2) out float o_brightness;
 layout (location = 3) out float o_size;
+
+uniform float dPhi;
+
+uniform float muP;
+uniform float muF;
 
 void main() {
     // get num fireflies

@@ -1,0 +1,121 @@
+#pragma once
+
+/*
+ * Created by Kami-Kaze on 4/11/2021.
+ * Next Steps:
+ *
+ */
+
+#include <glm/glm.hpp>
+
+#include <core/application/application.h>
+#include <core/events/mouse_events.h>
+
+#include <core/renderer/shader_program/shader_program.h>
+#include <core/renderer/buffer/buffer.h>
+
+using namespace Engine;
+
+struct FireflyData {
+    glm::vec2 position = glm::vec2(0.f);
+    float _p3 = 0, _p4 = 0;                        // padding
+
+    glm::vec3 color = glm::vec3(0.f);
+
+    float size = 0;
+    float phi = 0, frequency = 0;
+    float nudgePhi = 0, nudgeFrequency = 0;
+};
+
+class FirefliesCsApplication : public Application {
+    /* Inherited methods */
+public:
+    // those two are probably not needed
+    void init() override;
+
+    void shutdown() override;
+
+    // set up opengl
+    void onContextAttach(Context* context) override;
+
+    // shut down opengl
+    void onContextDetach(Context* context) override;
+
+protected:
+    void setup(ApplicationProps& props) override;
+
+    void update(float dt) override;
+
+    void render(Context* context) override;
+
+    void onEvent(Event* e) override;
+
+private:
+    /* constants */
+    static constexpr float TWO_PI = glm::radians(360.f);
+
+    /* todo: put this somewhere (aka get your ass up and add imgui support lol)*/
+
+    // opengl config
+    static constexpr int
+            COMPUTE_CLUSTERS_X = 3,
+            COMPUTE_CLUSTERS_Y = 2,
+            COMPUTE_CLUSTERS_Z = 2,
+            COMPUTE_CLUSTER_SIZE_BASE = 10,
+    // sike! :')
+    COMPUTE_CLUSTER_SIZE_X = COMPUTE_CLUSTER_SIZE_BASE,
+            COMPUTE_CLUSTER_SIZE_Y = COMPUTE_CLUSTER_SIZE_BASE,
+            COMPUTE_CLUSTER_SIZE_Z = COMPUTE_CLUSTER_SIZE_BASE,
+            COMPUTE_CLUSTERS = COMPUTE_CLUSTERS_X * COMPUTE_CLUSTERS_Y * COMPUTE_CLUSTERS_Z,
+            COMPUTE_CLUSTER_SIZE = COMPUTE_CLUSTER_SIZE_X * COMPUTE_CLUSTER_SIZE_Y * COMPUTE_CLUSTER_SIZE_Z,
+            NUM_FIREFLIES = COMPUTE_CLUSTERS * COMPUTE_CLUSTER_SIZE;
+
+    // general config
+    static constexpr int NUM_COLORS = 1;
+    static constexpr float SIMULATION_SPEED = .75f;
+
+    static constexpr float FIREFLY_SIZE = .004f;                  // size of a firefly
+    static constexpr float BLINK_THRESHOLD = .75f;                 // percentage of one cycle a firefly is lit
+    static constexpr float FIREFLY_MAX_FREQUENCY = 1.5f;          // max frequency of a firefly
+    static constexpr float FIREFLY_MAX_PHASE = TWO_PI;
+
+    static constexpr float
+            muP = 1e3f,                  // how much nearby fireflies phase effect a 'this' firefly
+            muF = 1e3f,                  // how much nearby fireflies frequency effect a 'this' firefly
+            epsilonV = 25.f,             // how 'fast' a fireflies vision 'decays'
+            epsilonC = 25.f;             // how less 'interesting' different colors are
+
+    // internal
+    static constexpr float OMEGA = SIMULATION_SPEED * TWO_PI;
+
+    /* Camera */
+    static constexpr float CAMERA_SCALE_SPEED = 1.1f;
+    glm::vec2 cameraOffset;
+    float cameraScale;
+    glm::mat4 camera;
+    glm::mat4 cameraInverse;
+
+    bool cameraChanged = false;
+
+    /* Opengl */
+    ShaderProgram* renderShader = nullptr;
+    ShaderProgram* computeShader = nullptr;
+    Buffer<FireflyData>* computeBuffer;
+
+    int rsDPhiLocation = 0, rsViewLocation = 0;
+
+    bool rmbDown;
+    glm::vec2 lastMousePos = glm::vec2(0.f);
+
+    bool onMouseButtonPressEvent(MouseButtonPressEvent* e);
+    bool onMouseButtonReleaseEvent(MouseButtonReleaseEvent* e);
+    bool onMouseMoveEvent(MouseMoveEvent* e);
+    bool onMouseWheelScrollEvent(MouseWheelScrollEvent* e);
+
+    void resetCamera();
+    void updateCamera();
+    void uploadCamera();
+};
+
+
+
