@@ -1,37 +1,39 @@
 /*
- * Created by Kami-Kaze on 3/28/2021.
+ * Created by Kami-Kaze on 4/15/2021.
  */
 
 #include "shader_program.h"
 
-#include <iostream>
-
-#include "macros/gl_call.h"
-
 namespace Engine {
 
-    ShaderProgram::ShaderProgram(GLuint id) : id(id) {}
+    ShaderProgram::ShaderProgram(const unsigned int id)  : id(id) {}
 
-    ShaderProgram::~ShaderProgram() {
-        GL_CALL(glDeleteProgram(id));
-    }
-
-    void ShaderProgram::bind() const {
+    void ShaderProgram::use() const {
         GL_CALL(glUseProgram(id));
     }
 
-    void ShaderProgram::unbind() const {
-        GL_CALL(glUseProgram(0));
+    bool ShaderProgram::isBound(const unsigned int id) {
+        int active = -1;
+        GL_CALL(glGetIntegerv(GL_CURRENT_PROGRAM, &active));
+        return active == id;
     }
 
-    int ShaderProgram::getUniformLocation(std::string name) const {
-        GL_CALL(int location = glGetUniformLocation(id, name.c_str()));
-        if (location == -1) LOG_CORE_WARN("Can not fetch uniform location for uniform {} in shader program {}", name, id);
-        return location;
+    int ShaderProgram::getUniformLocation(const std::string& name) {
+        auto it = uniformLocations.find(name);
+        if (it == uniformLocations.end()) {
+            // not registered -> fetch and cache
+            GL_CALL(int location = glGetUniformLocation(id, name.c_str()));
+            uniformLocations.insert(std::make_pair(name, location));
+
+            return location;
+        }
+
+        // registered -> return location
+        return it->second;
     }
 
-    ShaderProgram *ShaderProgram::fromShaderList(const ShaderList& shaderList) {
-        GLuint id = linkShaderProgram(shaderList);
+    ShaderProgram* ShaderProgram::createProgram(const ShaderList& shaderList) {
+        const unsigned int id = linkProgram(shaderList);
         if (id) {
             return new ShaderProgram(id);
         }
@@ -40,8 +42,8 @@ namespace Engine {
         return nullptr;
     }
 
-    GLuint ShaderProgram::linkShaderProgram(const ShaderList& shaderList) {
-        GLuint program = glCreateProgram();
+    unsigned int ShaderProgram::linkProgram(const ShaderList& shaderList) {
+        GL_CALL(unsigned int program = glCreateProgram());
 
         for (Shader* shader : shaderList.getShaders()) {
             GL_CALL(glAttachShader(program, shader->id));
@@ -53,8 +55,8 @@ namespace Engine {
             GL_CALL(glDetachShader(program, shader->id));
         }
 
-        GLuint isLinked = 0;
-        glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
+        int isLinked = 0;
+        GL_CALL(glGetProgramiv(program, GL_LINK_STATUS, &isLinked));
         if (isLinked == GL_FALSE)
         {
             GLint maxLength = 0;
