@@ -13,6 +13,7 @@
 
 #include <core/renderer/shader_program/shader_program.h>
 #include <core/renderer/buffer/buffer.h>
+#include <core/renderer/camera/camera.h>
 
 using namespace Engine;
 
@@ -90,11 +91,7 @@ private:
 
     /* Camera */
     static constexpr float CAMERA_SCALE_SPEED = 1.1f;
-    glm::vec2 cameraOffset;
-    float cameraScale;
-    glm::mat4 camera;
-    glm::mat4 cameraInverse;
-
+    Camera camera = Camera("view");
     bool cameraChanged = false;
 
     /* Opengl */
@@ -103,12 +100,9 @@ private:
     Buffer<FireflyData>* computeBuffer;
 
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
-    Uniform<glm::mat4> uView = Uniform<glm::mat4>("view", glm::mat4(1.f));
 
     bool onMouseButtonPressEvent(MouseButtonPressEvent* e);
 
-    void resetCamera();
-    void updateCamera();
     void uploadCamera();
 };
 

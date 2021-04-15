@@ -1,13 +1,9 @@
 #pragma once
 
 /*
- * Created by Kami-Kaze on 4/15/2021.
- */
-
-#pragma once
-
-/*
  * Created by Kami-Kaze on 4/14/2021.
+ *
+ * todo: move implementations to .cpp
  */
 
 #include <glm/glm.hpp>

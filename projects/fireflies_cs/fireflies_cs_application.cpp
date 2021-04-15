@@ -132,6 +132,7 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
     renderShader->uploadUniform(Uniform("muP", muP));
     renderShader->uploadUniform(Uniform("muF", muF));
     renderShader->uploadUniform(Uniform("blinkThreshold", BLINK_THRESHOLD));
+    renderShader->uploadUniform(camera.getUniform());
 
     // change compute shader
     shaderList.pushFromFile(
@@ -150,8 +151,7 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
     GL_CALL(glEnable(GL_BLEND));
     GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-    // init camera
-    resetCamera();
+    // set clear color
     context->setClearColor(0.f, 0.f, 0.f, 0.f);
 }
 
@@ -176,30 +176,20 @@ void FirefliesCsApplication::update(float dt) {
     // update camera based on input
     InputController* controller = getWindow()->getInputController();
     if (controller->isKeyDown(Key::C)) {
-        resetCamera();
+        camera.reset();
+        cameraChanged = true;
     }
     if (controller->isMouseButtonDown(Mouse::ButtonRight) && controller->didMouseMove()) {
-        cameraOffset += controller->getMouseDelta();
-        updateCamera();
+        glm::vec2 delta = controller->getMouseDelta();
+        camera.translate(glm::vec3(delta.x, delta.y, 0.f));
+        cameraChanged = true;
     }
     if (controller->didMouseWheelScroll()) {
-        const float f = glm::pow(CAMERA_SCALE_SPEED, controller->getMouseWheelDelta().x);
-
-        glm::vec2 mouse = getWindow()->getInputController()->getMousePosition();
-        glm::vec4 at0 = glm::vec4(mouse.x, mouse.y, 0.f, 1.f);
-
-        glm::vec4 atScreen0 = cameraInverse * at0;
-
-        cameraScale *= f;
-        updateCamera();
-
-        glm::vec4 atScreen1 = cameraInverse * at0;
-        glm::vec4 offsetScreen = atScreen0 - atScreen1;
-        glm::vec4 offset = camera * offsetScreen;
-
-        cameraOffset -= glm::vec2(offset.x, offset.y);
-
-        updateCamera();
+        const glm::vec2 mouse = controller->getMousePosition();
+        const glm::vec3 at = glm::vec3(mouse.x, mouse.y, 0.f);
+        const float delta = glm::pow(CAMERA_SCALE_SPEED, controller->getMouseWheelDelta().x);
+        camera.scale(glm::vec3(delta, delta, 1.f), at);
+        cameraChanged = true;
     }
 
 #if 0
@@ -251,7 +241,7 @@ void FirefliesCsApplication::render(Context* context) {
 
 bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
     if (e->code == Mouse::ButtonLeft) {
-        glm::vec4 worldAt = cameraInverse * glm::vec4(e->pos.x, e->pos.y, 0.f, 1.f);
+        glm::vec4 worldAt = camera.applyInverse(glm::vec4(e->pos.x, e->pos.y, 0.f, 1.f));
         LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e->pos.x, e->pos.y, worldAt.x, worldAt.y);
     }
     return false;
@@ -262,28 +252,8 @@ void FirefliesCsApplication::onEvent(Event* e) {
     dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonPressEvent));
 }
 
-void FirefliesCsApplication::resetCamera() {
-    cameraOffset = glm::vec2(0.f, 0.f);
-    cameraScale = 1.f;
-    updateCamera();
-}
-
-void FirefliesCsApplication::updateCamera() {
-    // calculate new camera
-    camera = glm::mat4(1.f);
-    camera = glm::translate(camera, glm::vec3(cameraOffset.x, cameraOffset.y, 0.f));
-    camera = glm::scale(camera, glm::vec3(cameraScale, cameraScale, 1.f));
-
-    cameraInverse = glm::mat4(1.f);
-    cameraInverse = glm::scale(cameraInverse, glm::vec3(1.f / cameraScale, 1.f / cameraScale, 1.f));
-    cameraInverse = glm::translate(cameraInverse, glm::vec3(-cameraOffset.x, -cameraOffset.y, 0.f));
-
-    cameraChanged = true;
-}
-
 void FirefliesCsApplication::uploadCamera() {
-    uView.data = camera;
     renderShader->use();
-    renderShader->uploadUniform(uView);
+    renderShader->uploadUniform(camera.getUniform());
     cameraChanged = false;
 }
