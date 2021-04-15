@@ -22,6 +22,8 @@ namespace Engine {
     struct Uniform {
         std::string name;
         T data;
+
+        inline Uniform(const std::string name, T data) : name(name), data(data) {}
     };
 
     class ShaderProgram {

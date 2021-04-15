@@ -131,35 +131,27 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
             ShaderType::FRAGMENT,
             R"(C:\Development\Projects\simulations\projects\fireflies_cs\resources\fragment_shader.glsl)"
     );
-    renderShader = ShaderProgram::fromShaderList(shaderList);
+    renderShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
 
     /* push uniforms */
-    renderShader->bind();
-    GL_CALL(glUniform1f(renderShader->getUniformLocation("muP"), muP));
-    GL_CALL(glUniform1f(renderShader->getUniformLocation("muF"), muF));
-    GL_CALL(glUniform1f(renderShader->getUniformLocation("blinkThreshold"), BLINK_THRESHOLD));
-    // fetch dPhi and view location
-    rsDPhiLocation = renderShader->getUniformLocation("dPhi");
-    rsViewLocation = renderShader->getUniformLocation("view");
-    renderShader->unbind();
+    renderShader->use();
+    renderShader->uploadUniform(Uniform("muP", muP));
+    renderShader->uploadUniform(Uniform("muF", muF));
+    renderShader->uploadUniform(Uniform("blinkThreshold", BLINK_THRESHOLD));
 
     // change compute shader
     shaderList.pushFromFile(
             ShaderType::COMPUTE,
             R"(C:\Development\Projects\simulations\projects\fireflies_cs\resources\compute_shader.glsl)"
     );
-    computeShader = ShaderProgram::fromShaderList(shaderList);
+    computeShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
 
     /* push uniforms */
-    computeShader->bind();
-    GL_CALL(glUniform1f(computeShader->getUniformLocation("epsilonV"), epsilonV));
-    GL_CALL(glUniform1f(computeShader->getUniformLocation("epsilonC"), epsilonC));
-    computeShader->unbind();
-
-    // enable point size
-    GL_CALL(glEnable(GL_PROGRAM_POINT_SIZE));
+    computeShader->use();
+    computeShader->uploadUniform(Uniform("epsilonV", epsilonV));
+    computeShader->uploadUniform(Uniform("epsilonC", epsilonC));
 
     // set blend
     GL_CALL(glEnable(GL_BLEND));
@@ -177,20 +169,16 @@ void FirefliesCsApplication::onContextDetach(Context* context) {
 void FirefliesCsApplication::update(float dt) {
     // update timing
     // update phi
-    const float dPhi = OMEGA * dt;
+    uDPhi.data = OMEGA * dt;
 
     /* update quad shader dPhi */
-    renderShader->bind();
-    GL_CALL(glUniform1f(rsDPhiLocation, dPhi));
-    renderShader->unbind();
+    renderShader->use();
+    renderShader->uploadUniform(uDPhi);
 
     /* calculate change */
-    computeShader->bind();
-    // calculate change
+    computeShader->use();
     GL_CALL(glDispatchCompute(COMPUTE_CLUSTERS_X, COMPUTE_CLUSTERS_Y, COMPUTE_CLUSTERS_Z));
-    // wait for completion
     GL_CALL(glMemoryBarrier(GL_SHADER_STORAGE_BUFFER));
-    computeShader->unbind();
 
     // update camera based on input
     InputController* controller = getWindow()->getInput();
@@ -238,12 +226,11 @@ void FirefliesCsApplication::render(Context* context) {
     context->clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw
-    renderShader->bind();
+    renderShader->use();
     if (cameraChanged) {
         uploadCamera();
     }
     GL_CALL(glDrawArraysInstanced(GL_POINTS, 0, 1, NUM_FIREFLIES));
-    renderShader->unbind();
 }
 
 bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
@@ -329,7 +316,8 @@ void FirefliesCsApplication::updateCamera() {
 }
 
 void FirefliesCsApplication::uploadCamera() {
-    // upload new camera
-    GL_CALL(glUniformMatrix4fv(rsViewLocation, 1, GL_FALSE, glm::value_ptr(camera)));
+    uView.data = camera;
+    renderShader->use();
+    renderShader->uploadUniform(uView);
     cameraChanged = false;
 }

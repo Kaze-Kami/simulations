@@ -74,9 +74,9 @@ private:
     static constexpr int NUM_COLORS = 1;
     static constexpr float SIMULATION_SPEED = .75f;
 
-    static constexpr float FIREFLY_SIZE = .004f;                  // size of a firefly
+    static constexpr float FIREFLY_SIZE = .004f;                   // size of a firefly
     static constexpr float BLINK_THRESHOLD = .75f;                 // percentage of one cycle a firefly is lit
-    static constexpr float FIREFLY_MAX_FREQUENCY = 1.5f;          // max frequency of a firefly
+    static constexpr float FIREFLY_MAX_FREQUENCY = 1.5f;           // max frequency of a firefly
     static constexpr float FIREFLY_MAX_PHASE = TWO_PI;
 
     static constexpr float
@@ -102,7 +102,8 @@ private:
     ShaderProgram* computeShader = nullptr;
     Buffer<FireflyData>* computeBuffer;
 
-    int rsDPhiLocation = 0, rsViewLocation = 0;
+    Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
+    Uniform<glm::mat4> uView = Uniform<glm::mat4>("view", glm::mat4(1.f));
 
     bool rmbDown;
     glm::vec2 lastMousePos = glm::vec2(0.f);

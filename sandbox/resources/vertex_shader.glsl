@@ -1,14 +1,12 @@
 #version 450 core
 
-layout (location = 0) out vec2 o_position;
-layout (location = 1) out vec3 o_color;
-layout (location = 2) out float o_brightness;
-layout (location = 3) out float o_size;
+layout (location = 0) in vec2 i_position;
+layout (location = 0) out vec3 o_color;
+
+uniform vec3 u_color;
+uniform float u_phi;
 
 void main() {
-    //! fake data for testing
-    o_color = vec3(1.f, 1.f, 0.f);
-    o_brightness = 1.f;
-    o_size = .5f;
-    o_position = vec2(0f, 0.f);
+    o_color = u_color * (1.f + sin(u_phi)) / 2.f;
+    gl_Position = vec4(i_position, 0.f, 1.f);
 }

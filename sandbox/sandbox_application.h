@@ -10,26 +10,19 @@
 #include <core/renderer/shader_program/shader_program.h>
 #include <core/renderer/vertex_array/vertex_array.h>
 
-static constexpr int NUM_FIREFLIES = 1;
-static constexpr float FIREFLY_SIZE = .001f;
+#include <glm/glm.hpp>
 
-struct Firefly {
-    float size;
+using namespace Engine;
+
+struct Vertex {
     glm::vec2 position;
-
-    float phase, frequency;
 };
 
-struct FireflyVertex {
-    glm::vec4 position;
-    glm::vec4 color;
-};
-
-class SandboxApplication : public Engine::Application {
+class SandboxApplication : public Application {
 public:
-    void onContextAttach() override;
+    void onContextAttach(Context* context) override;
 
-    void onContextDetach() override;
+    void onContextDetach(Context* context) override;
 
 protected:
     void setup(Engine::ApplicationProps& props) override;
@@ -39,12 +32,16 @@ protected:
     void render(Engine::Context* context) override;
 
 private:
-    Engine::ShaderProgram* renderShader = nullptr;
-    GLuint vertexArrayId = 0, vertexBufferId = 0, indexBufferId;
-};
 
-//! https://youtu.be/DVoylVUL7J0
-//! https://youtu.be/OqvVFd1W3Lg
+    static constexpr float frequency = 1.f * 2.f * glm::pi<float>();
+
+    ShaderProgram* renderShader = nullptr;
+    VertexArray* vertexArray = nullptr;
+    Buffer<Vertex>* vertexBuffer = nullptr;
+    Buffer<unsigned int>* indexBuffer = nullptr;
+    Uniform<glm::vec3> uColor = { "u_color", glm::vec3(.1f, .8f, .8f) };
+    Uniform<float> uPhi = {"u_phi", 0.f};
+};
 
 
 
