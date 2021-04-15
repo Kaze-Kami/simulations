@@ -73,7 +73,7 @@ set(SRC
         src/platform/opengl/impl_opengl.cpp
         src/platform/opengl/opengl_context.h
         src/platform/opengl/opengl_context.cpp
-        src/core/renderer/camera/camera.h)
+        src/core/renderer/camera/camera.h src/core/renderer/camera/camera_controller.h)
 
 # Includes
 set(INCLUDE src)

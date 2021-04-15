@@ -14,6 +14,7 @@
 #include <core/renderer/shader_program/shader_program.h>
 #include <core/renderer/buffer/buffer.h>
 #include <core/renderer/camera/camera.h>
+#include <core/renderer/camera/camera_controller.h>
 
 using namespace Engine;
 
@@ -60,7 +61,7 @@ private:
     // opengl config
     static constexpr int
             COMPUTE_CLUSTERS_X = 3,
-            COMPUTE_CLUSTERS_Y = 2,
+            COMPUTE_CLUSTERS_Y = 3,
             COMPUTE_CLUSTERS_Z = 2,
             COMPUTE_CLUSTER_SIZE_BASE = 10,
     // sike! :')
@@ -89,12 +90,8 @@ private:
     // internal
     static constexpr float OMEGA = SIMULATION_SPEED * TWO_PI;
 
-    /* Camera */
-    static constexpr float CAMERA_SCALE_SPEED = 1.1f;
-    Camera camera = Camera("view");
-    bool cameraChanged = false;
 
-    /* Opengl */
+    CameraController cameraController = CameraController(glm::vec2(1.f), .1f, "view");
     ShaderProgram* renderShader = nullptr;
     ShaderProgram* computeShader = nullptr;
     Buffer<FireflyData>* computeBuffer;
@@ -102,8 +99,6 @@ private:
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
 
     bool onMouseButtonPressEvent(MouseButtonPressEvent* e);
-
-    void uploadCamera();
 };
 
 

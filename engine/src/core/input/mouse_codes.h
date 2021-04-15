@@ -14,7 +14,7 @@ namespace Engine
     {
         enum : MouseCode
         {
-            None                   = -1,
+            ButtonNone             = -1,
 
             // From glfw3.h
             Button0                = 0,

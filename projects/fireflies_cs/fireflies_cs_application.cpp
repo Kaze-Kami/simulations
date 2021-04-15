@@ -58,7 +58,7 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
         f.position = glm::vec2(0.f);
         f.color = glm::rgbColor(glm::vec3(dist01(engine) * 360.f, 1.f, 1.f));
         f.size = .3;
-        f.phi = 0;
+        f.phi = .5f * glm::pi<float>();
         f.frequency = 0.f;
     } else {
         for (int i = 0; i < NUM_FIREFLIES; i++) {
@@ -132,7 +132,7 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
     renderShader->uploadUniform(Uniform("muP", muP));
     renderShader->uploadUniform(Uniform("muF", muF));
     renderShader->uploadUniform(Uniform("blinkThreshold", BLINK_THRESHOLD));
-    renderShader->uploadUniform(camera.getUniform());
+    renderShader->uploadUniform(cameraController.getCamera().getUniform());
 
     // change compute shader
     shaderList.pushFromFile(
@@ -175,22 +175,7 @@ void FirefliesCsApplication::update(float dt) {
 
     // update camera based on input
     InputController* controller = getWindow()->getInputController();
-    if (controller->isKeyDown(Key::C)) {
-        camera.reset();
-        cameraChanged = true;
-    }
-    if (controller->isMouseButtonDown(Mouse::ButtonRight) && controller->didMouseMove()) {
-        glm::vec2 delta = controller->getMouseDelta();
-        camera.translate(glm::vec3(delta.x, delta.y, 0.f));
-        cameraChanged = true;
-    }
-    if (controller->didMouseWheelScroll()) {
-        const glm::vec2 mouse = controller->getMousePosition();
-        const glm::vec3 at = glm::vec3(mouse.x, mouse.y, 0.f);
-        const float delta = glm::pow(CAMERA_SCALE_SPEED, controller->getMouseWheelDelta().x);
-        camera.scale(glm::vec3(delta, delta, 1.f), at);
-        cameraChanged = true;
-    }
+    cameraController.update(controller);
 
 #if 0
     /* for testing: map buffers so we can read them */
@@ -231,16 +216,20 @@ void FirefliesCsApplication::render(Context* context) {
     // clear
     context->clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // draw
+    // bind shader
     renderShader->use();
-    if (cameraChanged) {
-        uploadCamera();
+    // maybe update view
+    if (cameraController.needsUpload()) {
+        renderShader->uploadUniform(cameraController.getCamera().getUniform());
+        cameraController.setCameraUploaded();
     }
+    // draw
     GL_CALL(glDrawArraysInstanced(GL_POINTS, 0, 1, NUM_FIREFLIES));
 }
 
 bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
     if (e->code == Mouse::ButtonLeft) {
+        Camera& camera = cameraController.getCamera();
         glm::vec4 worldAt = camera.applyInverse(glm::vec4(e->pos.x, e->pos.y, 0.f, 1.f));
         LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e->pos.x, e->pos.y, worldAt.x, worldAt.y);
     }
@@ -250,10 +239,4 @@ bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
 void FirefliesCsApplication::onEvent(Event* e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonPressEvent));
-}
-
-void FirefliesCsApplication::uploadCamera() {
-    renderShader->use();
-    renderShader->uploadUniform(camera.getUniform());
-    cameraChanged = false;
 }

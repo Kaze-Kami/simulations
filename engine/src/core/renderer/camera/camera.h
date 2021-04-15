@@ -26,11 +26,17 @@ namespace Engine {
             currentScale = glm::vec3(1.f);
         }
 
+        inline void translate(glm::vec2 delta) {
+            translate(glm::vec3(delta.x, delta.y, 0.f));
+        }
         inline void translate(glm::vec3 delta) {
             currentOffset += delta;
             update();
         }
 
+        inline void scale(glm::vec2 delta, glm::vec2 at = glm::vec2(0.f)) {
+            scale(glm::vec3(delta.x, delta.y, 1.f), glm::vec3(at.x, at.y, 0.f));
+        }
         inline void scale(glm::vec3 delta, glm::vec3 at = glm::vec3(0.f)) {
             glm::vec4 at4 = glm::vec4(at.x, at.y, at.z, 1.f);
             glm::vec4 atScreen0 = viewInverse * at4;
