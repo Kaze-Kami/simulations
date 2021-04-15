@@ -45,12 +45,12 @@ namespace Engine {
         return 1.f - getGlobalMouseY() / getWindowHeight() * 2.f;
     }
 
-    bool GlfwInputController::isKeyDown(int key) const {
-        return glfwGetKey(window, key);
+    bool GlfwInputController::isKeyDown(KeyCode code) const {
+        return glfwGetKey(window, code);
     }
 
-    bool GlfwInputController::isMouseButtonDown(int button) const {
-        return glfwGetMouseButton(window, button);
+    bool GlfwInputController::isMouseButtonDown(MouseCode code) const {
+        return glfwGetMouseButton(window, code);
     }
 
     glm::vec2 GlfwInputController::getWindowSize() const {

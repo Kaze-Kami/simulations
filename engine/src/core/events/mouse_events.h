@@ -5,6 +5,7 @@
  */
 
 #include "event.h"
+#include "core/input/mouse_codes.h"
 
 #include <glm/glm.hpp>
 
@@ -21,24 +22,24 @@ namespace Engine {
 
     class MouseButtonPressEvent : public Event {
     public:
-        const int button;
+        const MouseCode code;
         const glm::vec2 pos, globalPos;
 
         EVENT_CLASS_TYPE(MouseButtonPress);
 
-        inline explicit MouseButtonPressEvent(const int button, const glm::vec2 pos, const glm::vec2 globalPos)
-                : button(button), pos(pos), globalPos(globalPos) {}
+        inline explicit MouseButtonPressEvent(const MouseCode code, const glm::vec2 pos, const glm::vec2 globalPos)
+                : code(code), pos(pos), globalPos(globalPos) {}
     };
 
     class MouseButtonReleaseEvent : public Event {
     public:
-        const int button;
+        const MouseCode code;
         const glm::vec2 pos, globalPos;
 
         EVENT_CLASS_TYPE(MouseButtonRelease);
 
-        inline explicit MouseButtonReleaseEvent(const int button, const glm::vec2 pos, const glm::vec2 globalPos)
-                : button(button), pos(pos), globalPos(globalPos) {}
+        inline explicit MouseButtonReleaseEvent(const MouseCode code, const glm::vec2 pos, const glm::vec2 globalPos)
+                : code(code), pos(pos), globalPos(globalPos) {}
     };
 
     class MouseWheelScrollEvent : public Event {

@@ -8,9 +8,12 @@
 #include "glfw_window.h"
 #include "macros/assert.h"
 #include "macros/gl_call.h"
+
 #include "core/logging/engine_log.h"
+
 #include "core/events/window_events.h"
 #include "core/events/mouse_events.h"
+#include "core/events/key_events.h"
 
 namespace Engine {
 
@@ -210,6 +213,14 @@ namespace Engine {
         });
 
         // set key callbacks
+        glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scanCode, int action, int mods) {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            if (action == GLFW_PRESS) {
+                data.messageQueue->dispatch(new KeyPressEvent(key, mods));
+            } else {
+                data.messageQueue->dispatch(new KeyReleaseEvent(key, mods));
+            }
+        });
 
         // show window
         glfwShowWindow(window);

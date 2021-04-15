@@ -8,15 +8,8 @@
 #include <chrono>
 
 #include <glm/gtx/color_space.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <core/events/event.h>
-#include <macros/bind.h>
 #include <core/logging/app_log.h>
-
-// todo: tmp, use own key- and mouse codes later
-#include <GLFW/glfw3.h>
+#include <macros/bind.h>
 
 /** Class implementation */
 
@@ -182,7 +175,7 @@ void FirefliesCsApplication::update(float dt) {
 
     // update camera based on input
     InputController* controller = getWindow()->getInput();
-    if (controller->isKeyDown(GLFW_KEY_C)) {
+    if (controller->isKeyDown(Key::C)) {
         resetCamera();
     }
 
@@ -234,13 +227,13 @@ void FirefliesCsApplication::render(Context* context) {
 }
 
 bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
-    if (e->button == GLFW_MOUSE_BUTTON_2) {
+    if (e->code == Mouse::ButtonRight) {
         // convert mouse position to local space
         lastMousePos = e->pos;
         glm::vec2 a = e->pos;
         glm::vec2 b = getWindow()->getInput()->getMousePosition();
         rmbDown = true;
-    } else if (e->button == GLFW_MOUSE_BUTTON_1) {
+    } else if (e->code == Mouse::ButtonLeft) {
         glm::vec4 worldAt = cameraInverse * glm::vec4(e->pos.x, e->pos.y, 0.f, 1.f);
         LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e->pos.x, e->pos.y, worldAt.x, worldAt.y);
     }
@@ -248,7 +241,7 @@ bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
 }
 
 bool FirefliesCsApplication::onMouseButtonReleaseEvent(MouseButtonReleaseEvent* e) {
-    if (e->button == GLFW_MOUSE_BUTTON_2) {
+    if (e->code == Mouse::ButtonRight) {
         rmbDown = false;
         lastMousePos = glm::vec2(0.f);
     }
@@ -275,10 +268,9 @@ bool FirefliesCsApplication::onMouseMoveEvent(MouseMoveEvent* e) {
 }
 
 bool FirefliesCsApplication::onMouseWheelScrollEvent(MouseWheelScrollEvent* e) {
-    auto* input = getWindow()->getInput();
     const float f = glm::pow(CAMERA_SCALE_SPEED, e->offsetY);
 
-    glm::vec2 mouse = input->getMousePosition();
+    glm::vec2 mouse = getWindow()->getInput()->getMousePosition();
     glm::vec4 at0 = glm::vec4(mouse.x, mouse.y, 0.f, 1.f);
 
     glm::vec4 atScreen0 = cameraInverse * at0;

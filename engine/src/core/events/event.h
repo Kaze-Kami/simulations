@@ -3,7 +3,6 @@
 /*
  * Created by Kami-Kaze on 3/27/2021.
  *
- * Event super class
  */
 
 #include <string>
@@ -15,6 +14,7 @@ namespace Engine {
         None = 0,
         WindowClose, WindowResize, WindowMove, ViewportChange,
         MouseMove, MouseButtonPress, MouseButtonRelease, MouseWheelScroll,
+        KeyPress, KeyRelease,
     };
 
 #define EVENT_CLASS_TYPE(type) inline static EventType getStaticType() { return EventType::type; } \

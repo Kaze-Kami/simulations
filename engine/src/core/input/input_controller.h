@@ -1,10 +1,19 @@
 #pragma once
 
 /*
+ * Created by Kami-Kaze on 4/15/2021.
+ */
+
+#pragma once
+
+/*
  * Created by Kami-Kaze on 4/14/2021.
  */
 
 #include <glm/glm.hpp>
+
+#include "key_codes.h"
+#include "mouse_codes.h"
 
 namespace Engine {
     class InputController {
@@ -20,7 +29,7 @@ namespace Engine {
         virtual float getMouseY() const = 0;
 
         // buttons
-        virtual bool isKeyDown(int key) const = 0;
-        virtual bool isMouseButtonDown(int button) const = 0;
+        virtual bool isKeyDown(KeyCode code) const = 0;
+        virtual bool isMouseButtonDown(MouseCode code) const = 0;
     };
 }

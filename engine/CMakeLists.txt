@@ -19,6 +19,11 @@ set(SRC
         src/core/events/mouse_events.h
         src/core/events/key_events.h
 
+        # core/input
+        src/core/input/key_codes.h
+        src/core/input/mouse_codes.h
+        src/core/input/input_controller.h
+
         # core/logging
         src/core/logging/logger.h
         src/core/logging/logger.cpp
@@ -43,7 +48,6 @@ set(SRC
         # core/window
         src/core/window/window.h
         src/core/window/window_props.h
-        src/core/window/input_controller.h
 
         # core/instrumentor
         src/core/instrumentor/instrumentor.cpp

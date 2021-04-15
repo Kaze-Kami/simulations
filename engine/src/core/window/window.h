@@ -5,7 +5,7 @@
  */
 
 #include "window_props.h"
-#include "input_controller.h"
+#include "core/input/input_controller.h"
 #include "core/events/event.h"
 #include "core/message_queue/message_queue.h"
 #include "core/renderer/renderSurface.h"

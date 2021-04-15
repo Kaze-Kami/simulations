@@ -4,7 +4,7 @@
  * Created by Kami-Kaze on 4/14/2021.
  */
 
-#include "core/window/input_controller.h"
+#include "core/input/input_controller.h"
 
 #include <GLFW/glfw3.h>
 
@@ -24,8 +24,8 @@ namespace Engine {
         float getMouseY() const;
 
         // buttons
-        bool isKeyDown(int key) const;
-        bool isMouseButtonDown(int button) const;
+        bool isKeyDown(KeyCode code) const;
+        bool isMouseButtonDown(MouseCode code) const;
     private:
         GLFWwindow* window;
 
