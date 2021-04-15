@@ -76,6 +76,9 @@ namespace Engine {
         context->bind();
         onContextAttach(context);
 
+        InputController* inputController = window->getInputController();
+        inputController->init();
+
         lastFrameTime = (float) glfwGetTime();
 
         double sumSwapDuration = 0;
@@ -84,6 +87,7 @@ namespace Engine {
         while (running) {
             // poll events
             messageQueue.pump();
+            inputController->update();
 
             // ToDo: This is only temporary and should be replaced with our own timing mechanism
             float t = (float) glfwGetTime();
@@ -113,18 +117,20 @@ namespace Engine {
         LOG_CORE_INFO("Avg swap duration: {:.6f} ms ({:.2f} fps)", avgSwapDuration * 1e3, avgFrameRate);
     }
 
+    bool Application::onMouseWheelScrollEvent(MouseWheelScrollEvent* e) {
+        //! update scroll on controller
+        window->getInputController()->recordMouseWheelScroll(glm::vec2(e->offsetY, e->offsetY));
+        return false;
+    }
+
     bool Application::onWindowViewportChangeEvent(WindowViewportChangeEvent* e) {
         window->getContext()->setViewport(e->x, e->y, e->width, e->height);
-
         return true;
     }
 
     bool Application::onWindowCloseEvent(WindowCloseEvent*) {
         // stop execution
-        // windowMutex.lock();
         running = false;
-        // windowMutex.unlock();
-
         return true;
     }
 
@@ -132,6 +138,7 @@ namespace Engine {
         EventDispatcher dispatcher(e);
         dispatcher.dispatch<WindowCloseEvent>(BIND_FN(Application::onWindowCloseEvent));
         dispatcher.dispatch<WindowViewportChangeEvent>(BIND_FN(Application::onWindowViewportChangeEvent));
+        dispatcher.dispatch<MouseWheelScrollEvent>(BIND_FN(Application::onMouseWheelScrollEvent));
 
         if (!e->handled) {
             onEvent(e);

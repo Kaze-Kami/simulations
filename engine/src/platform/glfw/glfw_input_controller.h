@@ -13,25 +13,15 @@ namespace Engine {
     public:
         GlfwInputController(GLFWwindow* window);
 
-        // global mouse pos (returns mouse position in screen coordinates
-        glm::vec2 getGlobalMousePosition() const;
-        float getGlobalMouseX() const;
-        float getGlobalMouseY() const;
+        bool isKeyDown(KeyCode code) const override;
+        bool isMouseButtonDown(MouseCode code) const override;
 
-        // local mouse pos (returns mouse position in relative coordinates (x, y in [-1, ..., 1])
-        glm::vec2 getMousePosition() const;
-        float getMouseX() const;
-        float getMouseY() const;
+    protected:
+        glm::vec2 getWindowSizeImpl() const override;
+        glm::vec2 getGlobalMousePosImpl() const override;
 
-        // buttons
-        bool isKeyDown(KeyCode code) const;
-        bool isMouseButtonDown(MouseCode code) const;
     private:
         GLFWwindow* window;
-
-        glm::vec2 getWindowSize() const;
-        float getWindowWidth() const;
-        float getWindowHeight() const;
     };
 }
 

@@ -29,7 +29,7 @@ namespace Engine {
             return glm::vec2(getWidth(), getHeight());
         }
 
-        virtual InputController* getInput() = 0;
+        virtual InputController* getInputController() = 0;
 
         static Window* create(const WindowProps& props, MessageQueue* messageQueue);
     };

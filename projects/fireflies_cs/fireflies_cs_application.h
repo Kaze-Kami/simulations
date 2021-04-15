@@ -105,13 +105,7 @@ private:
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
     Uniform<glm::mat4> uView = Uniform<glm::mat4>("view", glm::mat4(1.f));
 
-    bool rmbDown;
-    glm::vec2 lastMousePos = glm::vec2(0.f);
-
     bool onMouseButtonPressEvent(MouseButtonPressEvent* e);
-    bool onMouseButtonReleaseEvent(MouseButtonReleaseEvent* e);
-    bool onMouseMoveEvent(MouseMoveEvent* e);
-    bool onMouseWheelScrollEvent(MouseWheelScrollEvent* e);
 
     void resetCamera();
     void updateCamera();

@@ -174,9 +174,32 @@ void FirefliesCsApplication::update(float dt) {
     GL_CALL(glMemoryBarrier(GL_SHADER_STORAGE_BUFFER));
 
     // update camera based on input
-    InputController* controller = getWindow()->getInput();
+    InputController* controller = getWindow()->getInputController();
     if (controller->isKeyDown(Key::C)) {
         resetCamera();
+    }
+    if (controller->isMouseButtonDown(Mouse::ButtonRight) && controller->didMouseMove()) {
+        cameraOffset += controller->getMouseDelta();
+        updateCamera();
+    }
+    if (controller->didMouseWheelScroll()) {
+        const float f = glm::pow(CAMERA_SCALE_SPEED, controller->getMouseWheelDelta().x);
+
+        glm::vec2 mouse = getWindow()->getInputController()->getMousePosition();
+        glm::vec4 at0 = glm::vec4(mouse.x, mouse.y, 0.f, 1.f);
+
+        glm::vec4 atScreen0 = cameraInverse * at0;
+
+        cameraScale *= f;
+        updateCamera();
+
+        glm::vec4 atScreen1 = cameraInverse * at0;
+        glm::vec4 offsetScreen = atScreen0 - atScreen1;
+        glm::vec4 offset = camera * offsetScreen;
+
+        cameraOffset -= glm::vec2(offset.x, offset.y);
+
+        updateCamera();
     }
 
 #if 0
@@ -227,23 +250,9 @@ void FirefliesCsApplication::render(Context* context) {
 }
 
 bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
-    if (e->code == Mouse::ButtonRight) {
-        // convert mouse position to local space
-        lastMousePos = e->pos;
-        glm::vec2 a = e->pos;
-        glm::vec2 b = getWindow()->getInput()->getMousePosition();
-        rmbDown = true;
-    } else if (e->code == Mouse::ButtonLeft) {
+    if (e->code == Mouse::ButtonLeft) {
         glm::vec4 worldAt = cameraInverse * glm::vec4(e->pos.x, e->pos.y, 0.f, 1.f);
         LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e->pos.x, e->pos.y, worldAt.x, worldAt.y);
-    }
-    return false;
-}
-
-bool FirefliesCsApplication::onMouseButtonReleaseEvent(MouseButtonReleaseEvent* e) {
-    if (e->code == Mouse::ButtonRight) {
-        rmbDown = false;
-        lastMousePos = glm::vec2(0.f);
     }
     return false;
 }
@@ -251,41 +260,6 @@ bool FirefliesCsApplication::onMouseButtonReleaseEvent(MouseButtonReleaseEvent* 
 void FirefliesCsApplication::onEvent(Event* e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonPressEvent));
-    dispatcher.dispatch<MouseButtonReleaseEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonReleaseEvent));
-    dispatcher.dispatch<MouseMoveEvent>(BIND_FN(FirefliesCsApplication::onMouseMoveEvent));
-    dispatcher.dispatch<MouseWheelScrollEvent>(BIND_FN(FirefliesCsApplication::onMouseWheelScrollEvent));
-}
-
-bool FirefliesCsApplication::onMouseMoveEvent(MouseMoveEvent* e) {
-    if (!rmbDown) return false;
-    // todo: translate
-    glm::vec2 d = e->pos - lastMousePos;
-    lastMousePos = e->pos;
-    cameraOffset += d;
-
-    updateCamera();
-    return true;
-}
-
-bool FirefliesCsApplication::onMouseWheelScrollEvent(MouseWheelScrollEvent* e) {
-    const float f = glm::pow(CAMERA_SCALE_SPEED, e->offsetY);
-
-    glm::vec2 mouse = getWindow()->getInput()->getMousePosition();
-    glm::vec4 at0 = glm::vec4(mouse.x, mouse.y, 0.f, 1.f);
-
-    glm::vec4 atScreen0 = cameraInverse * at0;
-
-    cameraScale *= f;
-    updateCamera();
-
-    glm::vec4 atScreen1 = cameraInverse * at0;
-    glm::vec4 offsetScreen = atScreen0 - atScreen1;
-    glm::vec4 offset = camera * offsetScreen;
-
-    cameraOffset -= glm::vec2(offset.x, offset.y);
-
-    updateCamera();
-    return true;
 }
 
 void FirefliesCsApplication::resetCamera() {

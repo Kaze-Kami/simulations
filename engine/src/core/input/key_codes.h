@@ -8,12 +8,14 @@
 
 namespace Engine
 {
-    using KeyCode = uint16_t;
+    using KeyCode = int16_t;
 
     namespace Key
     {
         enum : KeyCode
         {
+            None                = -1,
+
             // From glfw3.h
             Space               = 32,
             Apostrophe          = 39, /* ' */

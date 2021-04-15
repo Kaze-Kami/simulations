@@ -39,16 +39,17 @@ namespace Engine {
         float getWidth() override;
         float getHeight() override;
 
-        InputController* getInput() override;
+        InputController* getInputController() override;
 
     private:
         GLFWwindow* window = nullptr;
-        GlfwInputController* inputController;
+        GlfwInputController* inputController = nullptr;
 
         struct WindowData {
             int width = 0, height = 0, posX = 0, posY = 0;
             int vpWidth = 0, vpHeight = 0;
-            bool vsync = true, multisample = true;
+
+            // everything we need within the glfw callbacks
             GLFWmonitor* monitor = nullptr;
             MessageQueue* messageQueue = nullptr;
             Context* context = nullptr;

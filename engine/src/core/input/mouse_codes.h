@@ -8,12 +8,14 @@
 
 namespace Engine
 {
-    using MouseCode = uint16_t;
+    using MouseCode = int16_t;
 
     namespace Mouse
     {
         enum : MouseCode
         {
+            None                   = -1,
+
             // From glfw3.h
             Button0                = 0,
             Button1                = 1,

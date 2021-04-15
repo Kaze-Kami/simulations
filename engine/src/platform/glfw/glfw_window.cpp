@@ -136,7 +136,6 @@ namespace Engine {
         data.context = Context::create(this);
 
         // multisample
-        data.multisample = props.multisample;
         data.context->setMultisample(props.multisample);
 
         // viewport
@@ -144,7 +143,6 @@ namespace Engine {
         data.context->setViewport(0, 0, data.vpWidth, data.vpHeight);
 
         // vsync
-        data.vsync = props.vsync;
         data.context->setVsync(props.vsync);
 
         // set user point (window data)
@@ -241,7 +239,7 @@ namespace Engine {
         return data.height;
     }
 
-    InputController* GlfwWindow::getInput() {
+    InputController* GlfwWindow::getInputController() {
         return inputController;
     }
 

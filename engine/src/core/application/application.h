@@ -10,6 +10,7 @@
 #include "core/window/window.h"
 #include "core/message_queue/message_queue.h"
 #include "core/events/window_events.h"
+#include "core/events/mouse_events.h"
 
 namespace Engine {
 
@@ -44,14 +45,16 @@ namespace Engine {
         inline virtual void onEvent(Event* e) {}
 
     private:
-        virtual void dispatchEvent(Event* e);
+        void dispatchEvent(Event* e);
         void renderLoop();
 
+        bool onMouseWheelScrollEvent(MouseWheelScrollEvent* e);
         bool onWindowViewportChangeEvent(WindowViewportChangeEvent* e);
         bool onWindowCloseEvent(WindowCloseEvent* e);
 
         bool initialized = false, running = false;
         float lastFrameTime = 0;
+
         Window* window = nullptr;
         std::thread* renderThread = nullptr;
         MessageQueue messageQueue;
