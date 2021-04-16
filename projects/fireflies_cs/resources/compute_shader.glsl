@@ -3,19 +3,9 @@
 #define LOCAL_SIZE 10
 #define ONE_OVER_SQRT_3 0.577350269189625764509148780501
 
-/*
- * Hint: all values are padded as vec4.
- * We can use those unused floats to return debug data:
- * 'actual' member    | 'used' member  | 'free' floats
- * vec4 position;     |  vec2          |  2
- * vec4 color;        |  vec3          |  1
- * vec4 currentData;  |  vec4          |  0
- * vec4 updateData;   |  vec3          |  1
- */
-
 struct Firefly {
-    vec2 position;      /* x, y + padding (0, 0) */
-    vec3 color;         /* r, g, b */
+    vec2 position;      /* x, y + 2 x padding */
+    vec3 color;         /* r, g, b + 1 x padding */
     float size;
     float phi, frequency;
     float nudgePhi, nudgeFrequency;
