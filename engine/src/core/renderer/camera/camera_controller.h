@@ -47,6 +47,6 @@ namespace Engine {
         float fScale;
 
         Camera camera;
-        bool cameraChanged;
+        bool cameraChanged = true;
     };
 }

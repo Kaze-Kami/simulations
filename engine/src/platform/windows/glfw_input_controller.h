@@ -6,12 +6,16 @@
 
 #include "core/input/input_controller.h"
 
-#include <GLFW/glfw3.h>
-
 namespace Engine {
+
+    class GlfwWindow;
+
     class GlfwInputController : public InputController {
     public:
-        GlfwInputController(GLFWwindow* window);
+        GlfwInputController(GlfwWindow* window);
+        ~GlfwInputController() = default;
+
+        bool isWindowFocused() const override;
 
         bool isKeyDown(KeyCode code) const override;
         bool isMouseButtonDown(MouseCode code) const override;
@@ -21,7 +25,7 @@ namespace Engine {
         glm::vec2 getGlobalMousePosImpl() const override;
 
     private:
-        GLFWwindow* window;
+        GlfwWindow* window;
     };
 }
 

@@ -10,11 +10,17 @@ namespace Engine {
     public:
         virtual ~RenderSurface() = default;
 
+        virtual void* getNativeWindow() = 0;
         virtual void* getProcAddressFun() = 0;
+
         virtual void makeContextCurrent() = 0;
+        virtual void releaseContext() = 0;
 
         virtual void swapBuffers() = 0;
 
         virtual void setVsync(bool enable) = 0;
+
+        virtual float getWidth() = 0;
+        virtual float getHeight() = 0;
     };
 }

@@ -17,7 +17,6 @@ namespace Engine {
     public:
         virtual ~Window() = default;
 
-        virtual void pollEvents() = 0;
         virtual void waitEvents() = 0;
 
         virtual Context* getContext() = 0;

@@ -14,8 +14,6 @@
 namespace Engine {
     class InputController {
     public:
-        InputController() = default;
-
         inline virtual void init() {
             // set last and current pos
             lastMousePos = getMousePosImpl();
@@ -29,6 +27,9 @@ namespace Engine {
             mouseWheelDelta = glm::vec2(0.f);
             mouseWheelBuffer = glm::vec2(0.f);
         }
+
+        /* General */
+        virtual bool isWindowFocused() const = 0;
 
         /* Mouse */
         virtual bool isMouseButtonDown(MouseCode code) const = 0;
@@ -105,6 +106,8 @@ namespace Engine {
 
         /* internal */
     protected:
+        InputController() = default;
+
         virtual glm::vec2 getGlobalMousePosImpl() const = 0;
 
         virtual glm::vec2 getWindowSizeImpl() const = 0;

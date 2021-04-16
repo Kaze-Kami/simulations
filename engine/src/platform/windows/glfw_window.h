@@ -28,17 +28,21 @@ namespace Engine {
 
         void setVsync(bool enable) override;
 
-        void pollEvents() override;
         void waitEvents() override;
 
+        GLFWwindow* getGlfwWindow();
+        void* getNativeWindow() override;
         void* getProcAddressFun() override;
+
         void makeContextCurrent() override;
+        void releaseContext() override;
 
         Context* getContext() override;
 
         float getWidth() override;
         float getHeight() override;
 
+        bool isFocused();
         InputController* getInputController() override;
 
     private:
@@ -48,6 +52,7 @@ namespace Engine {
         struct WindowData {
             int width = 0, height = 0, posX = 0, posY = 0;
             int vpWidth = 0, vpHeight = 0;
+            bool focused = false;
 
             // everything we need within the glfw callbacks
             GLFWmonitor* monitor = nullptr;

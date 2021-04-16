@@ -35,6 +35,8 @@ set(SRC
         src/core/renderer/renderSurface.h
 
         # core/renderer
+        src/core/renderer/camera/camera.h
+        src/core/renderer/camera/camera_controller.h
         src/core/renderer/shader_program/shader.h
         src/core/renderer/shader_program/shader.cpp
         src/core/renderer/shader_program/shader_program.h
@@ -62,18 +64,17 @@ set(SRC
         src/macros/no_op.h
         src/macros/timing.h
 
-        # platform/glfw
-        src/platform/glfw/impl_windows.cpp
-        src/platform/glfw/glfw_window.h
-        src/platform/glfw/glfw_window.cpp
-        src/platform/glfw/glfw_input_controller.cpp
-        src/platform/glfw/glfw_input_controller.h
-
-        # platform/opengl
-        src/platform/opengl/impl_opengl.cpp
-        src/platform/opengl/opengl_context.h
-        src/platform/opengl/opengl_context.cpp
-        src/core/renderer/camera/camera.h src/core/renderer/camera/camera_controller.h)
+        # platform/windows
+        src/platform/windows/impl_windows.cpp
+        src/platform/windows/glfw_window.h
+        src/platform/windows/glfw_window.cpp
+        src/platform/windows/glfw_input_controller.cpp
+        src/platform/windows/glfw_input_controller.h
+        src/platform/windows/opengl_context.h
+        src/platform/windows/opengl_context.cpp
+        src/platform/windows/imgui_impl.h
+        src/platform/windows/imgui_impl.cpp
+        )
 
 # Includes
 set(INCLUDE src)
@@ -81,10 +82,6 @@ set(INCLUDE src)
 # Create the library
 add_library(${PROJECT_NAME} STATIC ${SRC})
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE})
-
-# Definitions for GLFW
-
-# add_compile_definitions(GLFW_INCLUDE_NONE=1)
 
 # Vendor (3rd party)
 function(add_vendor_folder NAME)
@@ -95,4 +92,5 @@ endfunction()
 add_vendor_folder(Glad)
 add_vendor_folder(glfw)
 add_vendor_folder(glm)
+add_vendor_folder(imgui)
 add_vendor_folder(spdlog)

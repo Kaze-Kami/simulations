@@ -11,6 +11,7 @@
 #include <core/renderer/vertex_array/vertex_array.h>
 
 #include <glm/glm.hpp>
+#include <core/renderer/camera/camera_controller.h>
 
 using namespace Engine;
 
@@ -19,6 +20,20 @@ struct Vertex {
 };
 
 class SandboxApplication : public Application {
+private:
+
+    static constexpr float frequency = 1.f * 2.f * glm::pi<float>();
+
+    ShaderProgram* renderShader = nullptr;
+    VertexArray* vertexArray = nullptr;
+    Buffer<Vertex>* vertexBuffer = nullptr;
+    Buffer<unsigned int>* indexBuffer = nullptr;
+
+    Uniform<glm::vec3> uColor = { "u_color", glm::vec3(.1f, .8f, .8f) };
+    Uniform<float> uPhi = {"u_phi", 0.f};
+
+    CameraController cameraController = CameraController(glm::vec2(1.f), .1f, "view");
+
 public:
     void onContextAttach(Context* context) override;
 
@@ -31,16 +46,7 @@ protected:
 
     void render(Engine::Context* context) override;
 
-private:
-
-    static constexpr float frequency = 1.f * 2.f * glm::pi<float>();
-
-    ShaderProgram* renderShader = nullptr;
-    VertexArray* vertexArray = nullptr;
-    Buffer<Vertex>* vertexBuffer = nullptr;
-    Buffer<unsigned int>* indexBuffer = nullptr;
-    Uniform<glm::vec3> uColor = { "u_color", glm::vec3(.1f, .8f, .8f) };
-    Uniform<float> uPhi = {"u_phi", 0.f};
+    void onEvent(Event* e) override;
 };
 
 

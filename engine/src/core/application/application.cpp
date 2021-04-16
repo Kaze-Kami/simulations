@@ -51,7 +51,8 @@ namespace Engine {
         renderThread = new std::thread(&Application::renderLoop, this);
 
         // start event loop
-        while (running) {
+        // todo: window->getContext()->isBound() does not belong here
+        while (running || window->getContext()->isBound()) {
             // update events
             window->waitEvents();
         }
