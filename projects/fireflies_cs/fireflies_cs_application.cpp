@@ -153,6 +153,7 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
 
     // set clear color
     context->setClearColor(0.f, 0.f, 0.f, 0.f);
+    context->setClearFlags(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void FirefliesCsApplication::onContextDetach(Context* context) {
@@ -213,9 +214,6 @@ void FirefliesCsApplication::update(float dt) {
 }
 
 void FirefliesCsApplication::render(Context* context) {
-    // clear
-    context->clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // bind shader
     renderShader->use();
     // maybe update view

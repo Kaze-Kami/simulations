@@ -18,6 +18,8 @@ namespace Engine {
         virtual void bind() = 0;
         virtual void unbind() = 0;
 
+        virtual bool isBound() = 0;
+
         inline void swapBuffers() {
             renderSurface->swapBuffers();
         }
@@ -32,7 +34,7 @@ namespace Engine {
         inline virtual void setClearColor(float r, float g, float b) { setClearColor(r, g, b, 1.f); };
         inline virtual void setClearColor(glm::vec3 color) { setClearColor(color.r, color.g, color.b, 1.f); }
         inline virtual void setClearColor(glm::vec4 color) { setClearColor(color.r, color.g, color.b, color.a); }
-        virtual void clear(unsigned int flags = 0) = 0;
+        virtual void setClearFlags(unsigned int flags = 0) = 0;
 
         // not used yet, but interesting for the future
         inline virtual void beginFrame() {}

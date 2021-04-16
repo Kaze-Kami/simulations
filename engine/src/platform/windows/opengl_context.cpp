@@ -5,7 +5,6 @@
 #include "opengl_context.h"
 #include "macros/assert.h"
 #include "macros/gl_call.h"
-#include "core/logging/engine_log.h"
 
 namespace Engine {
 
@@ -92,8 +91,16 @@ namespace Engine {
     void OpenGlContext::unbind() {
         bound = false;
         contextThreadId = std::thread::id();
+        renderSurface->releaseContext();
+    }
 
-        // todo: ???
+    void OpenGlContext::beginFrame() {
+        // clear screen
+        GL_CALL(glClear(clearFlags));
+    }
+
+    void OpenGlContext::endFrame() {
+
     }
 
     void OpenGlContext::setVsync(bool enable) {
@@ -128,10 +135,14 @@ namespace Engine {
         GL_CALL(glClearColor(r, g, b, a));
     }
 
-    void OpenGlContext::clear(unsigned int flags) {
+    void OpenGlContext::setClearFlags(unsigned int flags) {
         CORE_ASSERT(bound, "Calling context functions on unbound context!");
         CORE_ASSERT(std::this_thread::get_id() == contextThreadId, "Calling context functions from unbound thread id!");
-        GL_CALL(glClear(flags));
+        clearFlags = flags;
+    }
+
+    bool OpenGlContext::isBound() {
+        return bound;
     }
 
 }

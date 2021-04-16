@@ -31,23 +31,27 @@ namespace Engine {
     class OpenGlContext : public Context {
     public:
         explicit OpenGlContext(RenderSurface* renderSurface);
+        ~OpenGlContext() override = default;
 
         void bind() override;
         void unbind() override;
+        bool isBound() override;
 
-        ~OpenGlContext() override = default;
+        void beginFrame() override;
+        void endFrame() override;
 
         void setVsync(bool enable) override;
         void setViewport(int x0, int y0, int width, int height) override;
         void setMultisample(bool enable) override;
 
         void setClearColor(float r, float g, float b, float a) override;
-        void clear(unsigned int flags) override;
+        void setClearFlags(unsigned int flags) override;
 
     private:
         std::thread::id contextThreadId;
         bool bound = false, multisample = false, vsync = false;
         int vpX0 = 0, vpY0 = 0, vpWidth = 1, vpHeight = 1;
+        unsigned int clearFlags = 0;
     };
 
 }
