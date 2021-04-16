@@ -16,9 +16,4 @@ namespace Engine {
         return new GlfwWindow(props, messageQueue);
     }
 
-    Context* Context::create(RenderSurface* renderSurface) {
-        return new OpenGlContext(renderSurface);
-    }
-
-
 }

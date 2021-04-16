@@ -10,6 +10,7 @@
 #include "core/window/window.h"
 #include "core/events/event.h"
 
+#include "opengl_context.h"
 #include "glfw_input_controller.h"
 
 namespace Engine {
@@ -31,11 +32,11 @@ namespace Engine {
         void waitEvents() override;
 
         GLFWwindow* getGlfwWindow();
-        void* getNativeWindow() override;
-        void* getProcAddressFun() override;
+        void* getNativeWindow();
+        void* getProcAddressFun();
 
-        void makeContextCurrent() override;
-        void releaseContext() override;
+        void makeContextCurrent();
+        void releaseContext();
 
         Context* getContext() override;
 
@@ -57,7 +58,7 @@ namespace Engine {
             // everything we need within the glfw callbacks
             GLFWmonitor* monitor = nullptr;
             MessageQueue* messageQueue = nullptr;
-            Context* context = nullptr;
+            OpenGlContext* context = nullptr;
         };
 
         WindowData data;

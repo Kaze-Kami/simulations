@@ -3,8 +3,17 @@
  */
 
 #include "opengl_context.h"
+
+#include "glfw_window.h"
+
 #include "macros/assert.h"
 #include "macros/gl_call.h"
+
+#include <imgui/imgui.h>
+
+#include "imgui_impl.h"
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <GLFW/glfw3.h>
 
 namespace Engine {
 
@@ -61,14 +70,14 @@ namespace Engine {
 
     }
 
-    OpenGlContext::OpenGlContext(RenderSurface* renderSurface) : Context(renderSurface) {}
+    OpenGlContext::OpenGlContext(GlfwWindow* window) : Context(window), window(window) {}
 
     void OpenGlContext::bind() {
         // make context current
-        renderSurface->makeContextCurrent();
+        window->makeContextCurrent();
 
         // init glad
-        int status = gladLoadGLLoader((GLADloadproc)renderSurface->getProcAddressFun());
+        int status = gladLoadGLLoader((GLADloadproc)window->getProcAddressFun());
         CORE_ASSERT(status, "Failed to initialize Glad!");
 
         LOG_CORE_INFO("OpenGL Info:");
@@ -85,28 +94,81 @@ namespace Engine {
         // set viewport and multisample and vsync
         internal::opengl_context::setMultisample(multisample);
         internal::opengl_context::setViewport(vpX0, vpY0, vpWidth, vpHeight);
-        renderSurface->setVsync(vsync);
+        window->setVsync(vsync);
+
+        // init imgui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+        // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+        // io.ConfigViewportsNoAutoMerge = true;
+        io.ConfigViewportsNoTaskBarIcon = true;
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+
+        // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+        ImGuiStyle& style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
+
+        // Setup Platform/Renderer backends
+        // todo: cast
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 450 core");
     }
 
     void OpenGlContext::unbind() {
+        // shut down imgui
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
+        // unbind context
         bound = false;
         contextThreadId = std::thread::id();
-        renderSurface->releaseContext();
+        window->releaseContext();
     }
 
     void OpenGlContext::beginFrame() {
         // clear screen
         GL_CALL(glClear(clearFlags));
+
+        // begin imgui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
     }
 
     void OpenGlContext::endFrame() {
 
+        // render imgui
+        ImGuiIO& io = ImGui::GetIO();
+        io.DisplaySize = ImVec2(window->getWidth(), window->getHeight());
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
     }
 
     void OpenGlContext::setVsync(bool enable) {
         vsync = enable;
         if (bound) {
-            renderSurface->setVsync(enable);
+            CORE_ASSERT(std::this_thread::get_id() == contextThreadId, "Calling context functions from unbound thread id!");
+            window->setVsync(enable);
         }
     }
 

@@ -4,12 +4,8 @@
  *  - get imgui to work
  */
 
+#include <imgui.h>
 #include "sandbox_application.h"
-
-#include <imgui/imgui.h>
-#include <platform/windows/imgui_impl.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
-#include <GLFW/glfw3.h>
 
 void SandboxApplication::onContextAttach(Context* context) {
     using namespace Engine;
@@ -71,42 +67,10 @@ void SandboxApplication::onContextAttach(Context* context) {
 
     context->setClearColor(.05f, .05f, .05f);
     context->setClearFlags(GL_COLOR_BUFFER_BIT);
-
-    /* init imgui */
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    // io.ConfigViewportsNoAutoMerge = true;
-    io.ConfigViewportsNoTaskBarIcon = true;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    // Setup Platform/Renderer backends
-    // todo: cast
-    ImGui_ImplGlfw_InitForOpenGL(dynamic_cast<GlfwWindow*>(getWindow()), true);
-    ImGui_ImplOpenGL3_Init("#version 450 core");
 }
 
 void SandboxApplication::onContextDetach(Context* context) {
-    /* shut down imgui */
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+
 }
 
 void SandboxApplication::setup(Engine::ApplicationProps& props) {
@@ -137,12 +101,6 @@ void SandboxApplication::render(Engine::Context* context) {
     }
     GL_CALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
-    // imgui
-    // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
     // bool show = true;
     // ImGui::ShowDemoWindow(&show);
 
@@ -150,20 +108,6 @@ void SandboxApplication::render(Engine::Context* context) {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize = ImVec2(getWindow()->getWidth(), getWindow()->getHeight());
-
-    // Rendering
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        GLFWwindow* backup_current_context = glfwGetCurrentContext();
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backup_current_context);
-    }
 }
 
 void SandboxApplication::onEvent(Event* e) {

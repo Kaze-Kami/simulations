@@ -46,6 +46,7 @@ set(SRC
         src/core/renderer/buffer/buffer.h
         src/core/renderer/vertex_array/vertex_array.h
         src/core/renderer/vertex_array/vertex_array_layout.h
+        src/core/renderer/imgui/imgui_loader.h
 
         # core/window
         src/core/window/window.h

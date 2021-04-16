@@ -40,9 +40,6 @@ namespace Engine {
         inline virtual void beginFrame() {}
         inline virtual void endFrame() {}
 
-        // virtual void drawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) = 0;
-
-        static Context* create(RenderSurface* renderSurface);
     protected:
         RenderSurface* renderSurface;
     };

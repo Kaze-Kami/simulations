@@ -144,7 +144,7 @@ namespace Engine {
         }
 
         // create context and push config
-        data.context = Context::create(this);
+        data.context = new OpenGlContext(this);
 
         // multisample
         data.context->setMultisample(props.multisample);

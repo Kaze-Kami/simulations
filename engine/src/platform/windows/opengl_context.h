@@ -28,9 +28,11 @@ namespace Engine {
 
     }
 
+    class GlfwWindow;
+
     class OpenGlContext : public Context {
     public:
-        explicit OpenGlContext(RenderSurface* renderSurface);
+        explicit OpenGlContext(GlfwWindow* window);
         ~OpenGlContext() override = default;
 
         void bind() override;
@@ -49,6 +51,8 @@ namespace Engine {
 
     private:
         std::thread::id contextThreadId;
+        GlfwWindow* window = nullptr;
+
         bool bound = false, multisample = false, vsync = false;
         int vpX0 = 0, vpY0 = 0, vpWidth = 1, vpHeight = 1;
         unsigned int clearFlags = 0;
