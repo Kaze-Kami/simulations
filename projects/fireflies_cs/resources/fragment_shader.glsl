@@ -23,9 +23,9 @@ void main() {
         const float c = .5f + .5f * pow(d, 2);
         o_color = vec4(i_vertex.color.xyz * c, ra * a);
     } else if (d < 2.f * i_vertex.size) {
-        // const float a = 1.f * (d - i_vertex.size);
+        const float a = .1f * (d - i_vertex.size) / i_vertex.size;
         //o_color = vec4(i_vertex.color.xyz, d);
-        o_color = vec4(1.f, 0.f, 0.f, d - i_vertex.size);
+        o_color = vec4(i_vertex.color.rgb, ra * a);
     } else {
         discard;
     }
