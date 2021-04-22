@@ -24,6 +24,7 @@ namespace Engine {
         inline void reset() {
             currentOffset = glm::vec3(0.f);
             currentScale = glm::vec3(1.f);
+            update();
         }
 
         inline void translate(glm::vec2 delta) {
