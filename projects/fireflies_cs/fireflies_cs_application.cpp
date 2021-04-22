@@ -193,8 +193,8 @@ void FirefliesCsApplication::onEvent(Event& e) {
 
 void FirefliesCsApplication::renderImGui() {
     if (ImGui::Begin("Info")) {
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                    ImGui::GetIO().Framerate);
+        ImGui::Text("%d fireflies", NUM_FIREFLIES);
+        ImGui::Text("~%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
     ImGui::End();
 
