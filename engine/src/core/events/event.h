@@ -34,18 +34,18 @@ namespace Engine {
     class EventDispatcher
     {
     public:
-        explicit EventDispatcher(Event* event): event(event) {}
+        explicit EventDispatcher(Event& event): event(event) {}
 
         template<typename T, typename F>
         inline void dispatch(const F& func)
         {
-            if (event->getType() == T::getStaticType())
+            if (event.getType() == T::getStaticType())
             {
-                event->handled |= func(static_cast<T*>(event));
+                event.handled |= func(static_cast<T&>(event));
             }
         }
     private:
-        Event* event;
+        Event& event;
     };
 
 

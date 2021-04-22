@@ -5,10 +5,8 @@
  */
 
 #include <thread>
-#include <mutex>
 
 #include "core/window/window.h"
-#include "core/message_queue/message_queue.h"
 #include "core/events/window_events.h"
 #include "core/events/mouse_events.h"
 
@@ -35,6 +33,8 @@ namespace Engine {
 
         Window* getWindow();
 
+        void dispatchEvent(Event& e);
+
         static Application* get();
         static Application* createApplication();
 
@@ -42,22 +42,18 @@ namespace Engine {
         inline virtual void setup(ApplicationProps& props) {};  // todo: improve naming
         inline virtual void update(float dt) {}
         inline virtual void render(Context* context) {}
-        inline virtual void onEvent(Event* e) {}
+        inline virtual void onEvent(Event& e) {}
 
     private:
-        void dispatchEvent(Event* e);
-        void renderLoop();
 
-        bool onMouseWheelScrollEvent(MouseWheelScrollEvent* e);
-        bool onWindowViewportChangeEvent(WindowViewportChangeEvent* e);
-        bool onWindowCloseEvent(WindowCloseEvent* e);
+        bool onMouseWheelScrollEvent(MouseWheelScrollEvent& e);
+        bool onWindowViewportChangeEvent(WindowViewportChangeEvent& e);
+        bool onWindowCloseEvent(WindowCloseEvent& e);
 
         bool initialized = false, running = false;
         float lastFrameTime = 0;
 
         Window* window = nullptr;
-        std::thread* renderThread = nullptr;
-        MessageQueue messageQueue;
 
         static Application* instance;
     };

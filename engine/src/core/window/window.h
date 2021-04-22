@@ -5,9 +5,11 @@
  */
 
 #include "window_props.h"
+
+#include <functional>
+
 #include "core/input/input_controller.h"
 #include "core/events/event.h"
-#include "core/message_queue/message_queue.h"
 #include "core/renderer/renderSurface.h"
 #include "core/renderer/context/context.h"
 
@@ -15,9 +17,11 @@ namespace Engine {
 
     class Window : public RenderSurface {
     public:
+        using EventFunction = std::function<void (Event&)>;
+
         virtual ~Window() = default;
 
-        virtual void waitEvents() = 0;
+        virtual void pollEvents() = 0;
 
         virtual Context* getContext() = 0;
 
@@ -30,7 +34,7 @@ namespace Engine {
 
         virtual InputController* getInputController() = 0;
 
-        static Window* create(const WindowProps& props, MessageQueue* messageQueue);
+        static Window* create(const WindowProps& props, const EventFunction& eventFunction);
     };
 
 }

@@ -31,9 +31,8 @@ namespace Engine {
         }
     }
 
-    GlfwWindow::GlfwWindow(const WindowProps &props, MessageQueue* messageQueue) {
-        data.messageQueue = messageQueue;
-        init(props);
+    GlfwWindow::GlfwWindow(const WindowProps &props, const EventFunction& eventFunction) {
+        init(props, eventFunction);
     }
 
     GlfwWindow::~GlfwWindow() {
@@ -52,10 +51,8 @@ namespace Engine {
         }
     }
 
-    void GlfwWindow::waitEvents() {
-        glfwWaitEvents();
-        // todo: fetch window stats (only possible here [in main thread])
-        data.focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) == GLFW_TRUE;
+    void GlfwWindow::pollEvents() {
+        glfwPollEvents();
     }
 
     GLFWwindow* GlfwWindow::getGlfwWindow() {
@@ -79,11 +76,12 @@ namespace Engine {
     }
 
     Context* GlfwWindow::getContext() {
-        return data.context;
+        return context;
     }
 
-    void GlfwWindow::init(const WindowProps& props) {
+    void GlfwWindow::init(const WindowProps& props, const EventFunction& eventFunction) {
         using namespace internal::glfw;
+        data.eventFunction = eventFunction;
 
         if (!glfwInitialized) {
             int glfwStatus = glfwInit();
@@ -97,6 +95,7 @@ namespace Engine {
 
         GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+        data.monitor = nullptr;
 
         if (props.fullscreen || props.maximized) {
             if (props.fullscreen) {
@@ -142,17 +141,17 @@ namespace Engine {
         }
 
         // create context and push config
-        data.context = new OpenGlContext(this);
+        context = new OpenGlContext(this);
 
         // multisample
-        data.context->setMultisample(props.multisample);
+        context->setMultisample(props.multisample);
 
         // viewport
         glfwGetFramebufferSize(window, &data.vpWidth, &data.vpHeight);
-        data.context->setViewport(0, 0, data.vpWidth, data.vpHeight);
+        context->setViewport(0, 0, data.vpWidth, data.vpHeight);
 
         // vsync
-        data.context->setVsync(props.vsync);
+        context->setVsync(props.vsync);
 
         // set user point (window data)
         glfwSetWindowUserPointer(window, &data);
@@ -162,7 +161,8 @@ namespace Engine {
         glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-            data.messageQueue->dispatchImmediately(new WindowCloseEvent);
+            WindowCloseEvent e;
+            data.eventFunction(e);
         });
 
         glfwSetWindowPosCallback(window, [](GLFWwindow* window, int xpos, int ypos) {
@@ -170,7 +170,8 @@ namespace Engine {
             data.posX = xpos;
             data.posY = ypos;
 
-            data.messageQueue->dispatch(new WindowMoveEvent(xpos, ypos));
+            WindowMoveEvent e(xpos, ypos);
+            data.eventFunction(e);
         });
 
         glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height)
@@ -180,11 +181,14 @@ namespace Engine {
             data.height = height;
 
             // window size changed
-            data.messageQueue->dispatch(new WindowResizeEvent(width, height));
+            WindowResizeEvent eResize(width, height);
+            data.eventFunction(eResize);
 
             // viewport changed too
             glfwGetFramebufferSize(window, &data.vpWidth, &data.vpHeight);
-            data.messageQueue->dispatch(new WindowViewportChangeEvent(0, 0, data.vpWidth, data.vpHeight));
+
+            WindowViewportChangeEvent eViewport(0, 0, data.vpWidth, data.vpHeight);
+            data.eventFunction(eViewport);
         });
 
         glfwSetCursorPosCallback(window, [](GLFWwindow* window, double posX,double posY) {
@@ -194,7 +198,8 @@ namespace Engine {
             //! invert y axis
             localPosition.y *= -1;
 
-            data.messageQueue->dispatch(new MouseMoveEvent(localPosition, globalPosition));
+            MouseMoveEvent e(localPosition, globalPosition);
+            data.eventFunction(e);
         });
 
         // set mouse callbacks
@@ -208,24 +213,30 @@ namespace Engine {
             localPosition.y *= -1;
 
             if (action == GLFW_PRESS) {
-                data.messageQueue->dispatch(new MouseButtonPressEvent(button, localPosition, globalPosition));
+                MouseButtonPressEvent e(button, localPosition, globalPosition);
+                data.eventFunction(e);
             } else {
-                data.messageQueue->dispatch(new MouseButtonReleaseEvent(button, localPosition, globalPosition));
+                MouseButtonReleaseEvent e(button, localPosition, globalPosition);
+                data.eventFunction(e);
             }
         });
 
         glfwSetScrollCallback(window, [](GLFWwindow* window, double offsetX, double offsetY) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-            data.messageQueue->dispatch(new MouseWheelScrollEvent(float(offsetX), float(offsetY)));
+            MouseWheelScrollEvent e((float(offsetX)), float(offsetY));
+            data.eventFunction(e);
         });
 
         // set key callbacks
         glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scanCode, int action, int mods) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
             if (action == GLFW_PRESS) {
-                data.messageQueue->dispatch(new KeyPressEvent(key, mods));
+                KeyPressEvent e(key, mods);
+                data.eventFunction(e);
             } else {
-                data.messageQueue->dispatch(new KeyReleaseEvent(key, mods));
+                KeyReleaseEvent e(key, mods);
+                data.eventFunction(e);
             }
         });
 
@@ -235,7 +246,7 @@ namespace Engine {
 
     void GlfwWindow::shutdown() {
         using namespace internal::glfw;
-        delete data.context;
+        delete context;
         glfwTerminate();
         glfwInitialized = false;
     }
@@ -246,10 +257,6 @@ namespace Engine {
 
     float GlfwWindow::getHeight() {
         return data.height;
-    }
-
-    bool GlfwWindow::isFocused() {
-        return data.focused;
     }
 
     InputController* GlfwWindow::getInputController() {

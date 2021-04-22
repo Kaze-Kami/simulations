@@ -28,9 +28,6 @@ namespace Engine {
             mouseWheelBuffer = glm::vec2(0.f);
         }
 
-        /* General */
-        virtual bool isWindowFocused() const = 0;
-
         /* Mouse */
         virtual bool isMouseButtonDown(MouseCode code) const = 0;
 

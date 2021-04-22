@@ -10,6 +10,7 @@
 
 #include <core/application/application.h>
 #include <core/events/mouse_events.h>
+#include <core/events/key_events.h>
 
 #include <core/renderer/shader_program/shader_program.h>
 #include <core/renderer/buffer/buffer.h>
@@ -50,7 +51,7 @@ protected:
 
     void render(Context* context) override;
 
-    void onEvent(Event* e) override;
+    void onEvent(Event& e) override;
 
 private:
     /* constants */
@@ -98,7 +99,9 @@ private:
 
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
 
-    bool onMouseButtonPressEvent(MouseButtonPressEvent* e);
+    bool onMouseButtonPressEvent(MouseButtonPressEvent& e);
+    bool onKeyPressEvent(KeyPressEvent& e);
+
 };
 
 

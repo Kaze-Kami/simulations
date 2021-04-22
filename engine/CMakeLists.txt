@@ -9,10 +9,6 @@ set(SRC
         src/core/application/application.h
         src/core/application/application.cpp
 
-        # core/message_queue
-        src/core/message_queue/message_queue.h
-        src/core/message_queue/message_queue.cpp
-
         # core/events
         src/core/events/event.h
         src/core/events/window_events.h

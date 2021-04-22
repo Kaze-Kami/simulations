@@ -40,6 +40,9 @@ namespace Engine {
         inline virtual void beginFrame() {}
         inline virtual void endFrame() {}
 
+        inline virtual void beginImGuiFrame() {}
+        inline virtual void endImGuiFrame() {}
+
     protected:
         RenderSurface* renderSurface;
     };

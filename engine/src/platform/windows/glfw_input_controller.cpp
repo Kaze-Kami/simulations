@@ -11,10 +11,6 @@ namespace Engine {
     GlfwInputController::GlfwInputController(GlfwWindow* window)
         : InputController(), window(window) {}
 
-    bool GlfwInputController::isWindowFocused() const {
-        return window->isFocused();
-    }
-
     bool GlfwInputController::isKeyDown(KeyCode code) const {
         return glfwGetKey(window->getGlfwWindow(), code);
     }

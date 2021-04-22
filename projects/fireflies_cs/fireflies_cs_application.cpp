@@ -228,16 +228,25 @@ void FirefliesCsApplication::render(Context* context) {
     GL_CALL(glDrawArraysInstanced(GL_POINTS, 0, 1, NUM_FIREFLIES));
 }
 
-bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent* e) {
-    if (e->code == Mouse::ButtonLeft) {
+bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
+    if (e.code == Mouse::ButtonLeft) {
         Camera& camera = cameraController.getCamera();
-        glm::vec4 worldAt = camera.applyInverse(glm::vec4(e->pos.x, e->pos.y, 0.f, 1.f));
-        LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e->pos.x, e->pos.y, worldAt.x, worldAt.y);
+        glm::vec4 worldAt = camera.applyInverse(glm::vec4(e.pos.x, e.pos.y, 0.f, 1.f));
+        LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e.pos.x, e.pos.y, worldAt.x, worldAt.y);
     }
     return false;
 }
 
-void FirefliesCsApplication::onEvent(Event* e) {
+bool FirefliesCsApplication::onKeyPressEvent(KeyPressEvent& e) {
+    if (e.code == Key::C) {
+        cameraController.getCamera().reset();
+        return true;
+    }
+    return false;
+}
+
+void FirefliesCsApplication::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonPressEvent));
+    dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesCsApplication::onKeyPressEvent));
 }

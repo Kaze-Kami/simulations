@@ -15,8 +15,6 @@ namespace Engine {
         GlfwInputController(GlfwWindow* window);
         ~GlfwInputController() = default;
 
-        bool isWindowFocused() const override;
-
         bool isKeyDown(KeyCode code) const override;
         bool isMouseButtonDown(MouseCode code) const override;
 

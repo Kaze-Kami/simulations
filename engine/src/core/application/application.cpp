@@ -11,11 +11,14 @@
 
 #include "core/logging/engine_log.h"
 
+#include <functional>
+#include <core/events/event.h>
+
 namespace Engine {
 
     Application* Application::instance = nullptr;
 
-    Application::Application() : messageQueue(MessageQueue(BIND_FN(Application::dispatchEvent))) {
+    Application::Application() {
         CORE_ASSERT(instance == nullptr, "Application already exists!");
         instance = this;
     }
@@ -27,7 +30,7 @@ namespace Engine {
         setup(props);
 
         // create window and do other stuff
-        window = Window::create(props.windowProps, &messageQueue);
+        window = Window::create(props.windowProps, BIND_FN(dispatchEvent));
 
         initialized = true;
     }
@@ -47,32 +50,6 @@ namespace Engine {
         LOG_CORE_TRACE("Application started!");
         running = true;
 
-        // start render loop
-        renderThread = new std::thread(&Application::renderLoop, this);
-
-        // start event loop
-        // todo: window->getContext()->isBound() does not belong here
-        while (running || window->getContext()->isBound()) {
-            // update events
-            window->waitEvents();
-        }
-
-        // wait for render loop to exit
-        renderThread->join();
-        delete renderThread;
-
-        LOG_CORE_TRACE("Application stopped!");
-    }
-
-    void Application::stop() {
-        running = false;
-    }
-
-    Window* Application::getWindow() {
-        return window;
-    }
-
-    void Application::renderLoop() {
         Context* context = window->getContext();
         context->bind();
         onContextAttach(context);
@@ -86,11 +63,11 @@ namespace Engine {
         long swaps = 0;
 
         while (running) {
-            // poll events
-            messageQueue.pump();
+            // update events
+            window->pollEvents();
             inputController->update();
 
-            // ToDo: This is only temporary and should be replaced with our own timing mechanism
+
             float t = (float) glfwGetTime();
             float dt = t - lastFrameTime;
             lastFrameTime = t;
@@ -107,41 +84,52 @@ namespace Engine {
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = end - start;
             sumSwapDuration += elapsed.count();
-            swaps ++;
+            swaps++;
         }
+
         onContextDetach(context);
         context->unbind();
 
-        //! todo: change to instrumentor
+        //! todo: change to instrumentor as its implemented
         const double avgSwapDuration = sumSwapDuration / swaps;
         const double avgFrameRate = 1.f / avgSwapDuration;
         LOG_CORE_INFO("Avg swap duration: {:.6f} ms ({:.2f} fps)", avgSwapDuration * 1e3, avgFrameRate);
+
+        LOG_CORE_TRACE("Application stopped!");
     }
 
-    bool Application::onMouseWheelScrollEvent(MouseWheelScrollEvent* e) {
+    void Application::stop() {
+        running = false;
+    }
+
+    Window* Application::getWindow() {
+        return window;
+    }
+
+    bool Application::onMouseWheelScrollEvent(MouseWheelScrollEvent& e) {
         //! update scroll on controller
-        window->getInputController()->recordMouseWheelScroll(glm::vec2(e->offsetY, e->offsetY));
+        window->getInputController()->recordMouseWheelScroll(glm::vec2(e.offsetY, e.offsetY));
         return false;
     }
 
-    bool Application::onWindowViewportChangeEvent(WindowViewportChangeEvent* e) {
-        window->getContext()->setViewport(e->x, e->y, e->width, e->height);
+    bool Application::onWindowViewportChangeEvent(WindowViewportChangeEvent& e) {
+        window->getContext()->setViewport(e.x, e.y, e.width, e.height);
         return true;
     }
 
-    bool Application::onWindowCloseEvent(WindowCloseEvent*) {
+    bool Application::onWindowCloseEvent(WindowCloseEvent& e) {
         // stop execution
         running = false;
         return true;
     }
 
-    void Application::dispatchEvent(Event* e) {
+    void Application::dispatchEvent(Event& e) {
         EventDispatcher dispatcher(e);
         dispatcher.dispatch<WindowCloseEvent>(BIND_FN(Application::onWindowCloseEvent));
         dispatcher.dispatch<WindowViewportChangeEvent>(BIND_FN(Application::onWindowViewportChangeEvent));
         dispatcher.dispatch<MouseWheelScrollEvent>(BIND_FN(Application::onMouseWheelScrollEvent));
 
-        if (!e->handled) {
+        if (!e.handled) {
             onEvent(e);
         }
     }

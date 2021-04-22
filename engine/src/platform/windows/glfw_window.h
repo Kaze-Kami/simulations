@@ -21,7 +21,7 @@ namespace Engine {
 
     class GlfwWindow : public Window {
     public:
-        explicit GlfwWindow(const WindowProps& props, MessageQueue* messageQueue);
+        explicit GlfwWindow(const WindowProps& props, const EventFunction& eventFunction);
 
         virtual ~GlfwWindow();
 
@@ -29,7 +29,7 @@ namespace Engine {
 
         void setVsync(bool enable) override;
 
-        void waitEvents() override;
+        void pollEvents() override;
 
         GLFWwindow* getGlfwWindow();
         void* getNativeWindow();
@@ -43,27 +43,25 @@ namespace Engine {
         float getWidth() override;
         float getHeight() override;
 
-        bool isFocused();
         InputController* getInputController() override;
 
     private:
         GLFWwindow* window = nullptr;
         GlfwInputController* inputController = nullptr;
+        OpenGlContext* context = nullptr;
 
         struct WindowData {
             int width = 0, height = 0, posX = 0, posY = 0;
             int vpWidth = 0, vpHeight = 0;
-            bool focused = false;
 
             // everything we need within the glfw callbacks
-            GLFWmonitor* monitor = nullptr;
-            MessageQueue* messageQueue = nullptr;
-            OpenGlContext* context = nullptr;
+            EventFunction eventFunction;
+            GLFWmonitor* monitor;
         };
 
         WindowData data;
 
-        void init(const WindowProps& props);
+        void init(const WindowProps& props, const EventFunction& eventFunction);
 
         void shutdown();
     };
