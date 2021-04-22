@@ -51,6 +51,8 @@ protected:
 
     void render(Context* context) override;
 
+    void renderImGui() override;
+
     void onEvent(Event& e) override;
 
 private:

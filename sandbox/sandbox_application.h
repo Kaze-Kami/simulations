@@ -48,7 +48,7 @@ protected:
 
     void render(Engine::Context* context) override;
 
-    void onEvent(Event* e) override;
+    void renderImGui() override;
 };
 
 

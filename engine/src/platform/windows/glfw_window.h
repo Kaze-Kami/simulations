@@ -31,7 +31,7 @@ namespace Engine {
 
         void pollEvents() override;
 
-        GLFWwindow* getGlfwWindow();
+        GLFWwindow* getGLFWwindow();
         void* getNativeWindow();
         void* getProcAddressFun();
 

@@ -5,6 +5,7 @@
 #include "glfw_input_controller.h"
 
 #include "glfw_window.h"
+#include "imgui.h"
 
 namespace Engine {
 
@@ -12,22 +13,22 @@ namespace Engine {
         : InputController(), window(window) {}
 
     bool GlfwInputController::isKeyDown(KeyCode code) const {
-        return glfwGetKey(window->getGlfwWindow(), code);
+        return !ImGui::GetIO().WantCaptureKeyboard && glfwGetKey(window->getGLFWwindow(), code);
     }
 
     bool GlfwInputController::isMouseButtonDown(MouseCode code) const {
-        return glfwGetMouseButton(window->getGlfwWindow(), code);
+        return !ImGui::GetIO().WantCaptureMouse && glfwGetMouseButton(window->getGLFWwindow(), code);
     }
 
     glm::vec2 GlfwInputController::getWindowSizeImpl() const {
         int w, h;
-        glfwGetWindowSize(window->getGlfwWindow(), &w, &h);
+        glfwGetWindowSize(window->getGLFWwindow(), &w, &h);
         return glm::vec2(float(w), float(h));
     }
 
     glm::vec2 GlfwInputController::getGlobalMousePosImpl() const {
         double x, y;
-        glfwGetCursorPos(window->getGlfwWindow(), &x, &y);
+        glfwGetCursorPos(window->getGLFWwindow(), &x, &y);
         return glm::vec2(float(x), float(y));
     }
 

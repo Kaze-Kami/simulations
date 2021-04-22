@@ -5,6 +5,8 @@
 
 #include "glfw_window.h"
 
+#include <imgui.h>
+
 #include "macros/assert.h"
 #include "macros/gl_call.h"
 
@@ -55,7 +57,7 @@ namespace Engine {
         glfwPollEvents();
     }
 
-    GLFWwindow* GlfwWindow::getGlfwWindow() {
+    GLFWwindow* GlfwWindow::getGLFWwindow() {
         return window;
     }
 
@@ -204,6 +206,8 @@ namespace Engine {
 
         // set mouse callbacks
         glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+            if (ImGui::GetIO().WantCaptureMouse) return;
+
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             double x, y;
             glfwGetCursorPos(window, &x, &y);
@@ -222,6 +226,8 @@ namespace Engine {
         });
 
         glfwSetScrollCallback(window, [](GLFWwindow* window, double offsetX, double offsetY) {
+            if (ImGui::GetIO().WantCaptureMouse) return;
+
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             MouseWheelScrollEvent e((float(offsetX)), float(offsetY));
             data.eventFunction(e);
@@ -229,6 +235,8 @@ namespace Engine {
 
         // set key callbacks
         glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scanCode, int action, int mods) {
+            if (ImGui::GetIO().WantCaptureKeyboard) return;
+
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
             if (action == GLFW_PRESS) {

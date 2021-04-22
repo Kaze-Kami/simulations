@@ -72,11 +72,18 @@ namespace Engine {
             float dt = t - lastFrameTime;
             lastFrameTime = t;
 
+            // update
             update(dt);
 
+            // render pass
             context->beginFrame();
             render(context);
             context->endFrame();
+
+            // imgui render pass
+            context->beginImGuiFrame();
+            renderImGui();
+            context->endImGuiFrame();
 
             //! todo: change to instrumentor
             auto start = std::chrono::high_resolution_clock::now();

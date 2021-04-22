@@ -42,10 +42,10 @@ namespace Engine {
         inline virtual void setup(ApplicationProps& props) {};  // todo: improve naming
         inline virtual void update(float dt) {}
         inline virtual void render(Context* context) {}
+        inline virtual void renderImGui() {}
         inline virtual void onEvent(Event& e) {}
 
     private:
-
         bool onMouseWheelScrollEvent(MouseWheelScrollEvent& e);
         bool onWindowViewportChangeEvent(WindowViewportChangeEvent& e);
         bool onWindowCloseEvent(WindowCloseEvent& e);

@@ -101,14 +101,12 @@ void SandboxApplication::render(Engine::Context* context) {
     }
     GL_CALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+}
+
+void SandboxApplication::renderImGui() {
     ImGui::ShowDemoWindow(&showDemoWindow);
 
     ImGui::Begin("Info");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
-
-}
-
-void SandboxApplication::onEvent(Event* e) {
-    Application::onEvent(e);
 }

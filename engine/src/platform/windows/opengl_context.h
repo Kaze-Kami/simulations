@@ -42,7 +42,10 @@ namespace Engine {
         void beginFrame() override;
         void endFrame() override;
 
-        void setVsync(bool enable) override;
+        void beginImGuiFrame() override;
+        void endImGuiFrame() override;
+
+        void setVsync(bool vsync) override;
         void setViewport(int x0, int y0, int width, int height) override;
         void setMultisample(bool enable) override;
 
@@ -50,10 +53,9 @@ namespace Engine {
         void setClearFlags(unsigned int flags) override;
 
     private:
-        std::thread::id contextThreadId;
         GlfwWindow* window = nullptr;
 
-        bool bound = false, multisample = false, vsync = false;
+        bool bound = false, vsync = false, multisample = false;
         int vpX0 = 0, vpY0 = 0, vpWidth = 1, vpHeight = 1;
         unsigned int clearFlags = 0;
     };

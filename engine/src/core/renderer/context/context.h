@@ -25,7 +25,7 @@ namespace Engine {
         }
 
         // opengl config
-        virtual void setVsync(bool enable) = 0;
+        virtual void setVsync(bool vsync) = 0;
         virtual void setViewport(int x0, int y0, int width, int height) = 0;
         virtual void setMultisample(bool enable) = 0;
 

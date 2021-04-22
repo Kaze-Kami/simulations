@@ -8,6 +8,9 @@
 #include <chrono>
 
 #include <glm/gtx/color_space.hpp>
+
+#include <imgui.h>
+
 #include <core/logging/app_log.h>
 #include <macros/bind.h>
 
@@ -249,4 +252,10 @@ void FirefliesCsApplication::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonPressEvent));
     dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesCsApplication::onKeyPressEvent));
+}
+
+void FirefliesCsApplication::renderImGui() {
+    ImGui::Begin("Info");
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
 }
