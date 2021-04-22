@@ -2,6 +2,8 @@
 
 /*
  * Created by Kami-Kaze on 4/15/2021.
+ *
+ * todo: move implementations to .cpp
  */
 
 #include "camera.h"
@@ -29,6 +31,10 @@ namespace Engine {
                 cameraChanged = true;
             }
         }
+        inline void resetCamera() {
+            camera.reset();
+            cameraChanged = true;
+        }
 
         Camera& getCamera() {
             return camera;
@@ -37,7 +43,6 @@ namespace Engine {
         inline bool needsUpload() const {
             return cameraChanged;
         }
-
         inline void setCameraUploaded() {
             cameraChanged = false;
         }

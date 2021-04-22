@@ -59,9 +59,6 @@ namespace Engine {
 
         lastFrameTime = (float) glfwGetTime();
 
-        double sumSwapDuration = 0;
-        long swaps = 0;
-
         while (running) {
             // update events
             window->pollEvents();
@@ -85,22 +82,11 @@ namespace Engine {
             renderImGui();
             context->endImGuiFrame();
 
-            //! todo: change to instrumentor
-            auto start = std::chrono::high_resolution_clock::now();
             context->swapBuffers();
-            auto end = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = end - start;
-            sumSwapDuration += elapsed.count();
-            swaps++;
         }
 
         onContextDetach(context);
         context->unbind();
-
-        //! todo: change to instrumentor as its implemented
-        const double avgSwapDuration = sumSwapDuration / swaps;
-        const double avgFrameRate = 1.f / avgSwapDuration;
-        LOG_CORE_INFO("Avg swap duration: {:.6f} ms ({:.2f} fps)", avgSwapDuration * 1e3, avgFrameRate);
 
         LOG_CORE_TRACE("Application stopped!");
     }

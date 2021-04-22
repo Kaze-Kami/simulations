@@ -2,6 +2,8 @@
 
 /*
  * Created by Kami-Kaze on 4/4/2021.
+ *
+ * todo: ? move implementations to .cpp
  */
 
 #include <glad/glad.h>
