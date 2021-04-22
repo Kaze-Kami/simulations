@@ -4,8 +4,6 @@
 
 #include "glfw_input_controller.h"
 
-#include <imgui.h>
-
 #include "glfw_window.h"
 
 namespace Engine {
@@ -18,11 +16,11 @@ namespace Engine {
     }
 
     bool GlfwInputController::isKeyDown(KeyCode code) const {
-        return !ImGui::GetIO().WantCaptureKeyboard && glfwGetKey(window->getGlfwWindow(), code);
+        return glfwGetKey(window->getGlfwWindow(), code);
     }
 
     bool GlfwInputController::isMouseButtonDown(MouseCode code) const {
-        return !ImGui::GetIO().WantCaptureMouse && glfwGetMouseButton(window->getGlfwWindow(), code);
+        return glfwGetMouseButton(window->getGlfwWindow(), code);
     }
 
     glm::vec2 GlfwInputController::getWindowSizeImpl() const {

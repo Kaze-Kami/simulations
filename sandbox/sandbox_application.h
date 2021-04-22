@@ -24,6 +24,8 @@ private:
 
     static constexpr float frequency = 1.f * 2.f * glm::pi<float>();
 
+    bool showDemoWindow = true;
+
     ShaderProgram* renderShader = nullptr;
     VertexArray* vertexArray = nullptr;
     Buffer<Vertex>* vertexBuffer = nullptr;

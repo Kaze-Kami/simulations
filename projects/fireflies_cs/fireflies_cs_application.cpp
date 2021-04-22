@@ -59,18 +59,21 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
         f.color = glm::rgbColor(glm::vec3(dist01(engine) * 360.f, 1.f, 1.f));
         f.size = .3;
         f.phi = .5f * glm::pi<float>();
-        f.frequency = 0.f;
+        f.frequency = 1.f;
     } else {
         for (int i = 0; i < NUM_FIREFLIES; i++) {
             // firefly params
-            float size = FIREFLY_SIZE;
+            float size = FIREFLY_SIZE; //  * (1.f + dist01(engine));
             float phase = dist01(engine) * FIREFLY_MAX_PHASE;
             float frequency = dist01(engine) * FIREFLY_MAX_FREQUENCY;
             // firefly color
 
             float hue;
-            if (0 < NUM_COLORS) {
-                hue = glm::floor(dist01(engine) * NUM_COLORS) * 360.f / NUM_COLORS;
+            if (1 == NUM_COLORS) {
+                static float sHue = dist01(engine) * 360.f;
+                hue = sHue;
+            } else if (0 < NUM_COLORS) {
+                hue = 10 + glm::floor(dist01(engine) * NUM_COLORS) * 350.f / NUM_COLORS;
             } else {
                 hue = dist01(engine) * 360.f;
             }

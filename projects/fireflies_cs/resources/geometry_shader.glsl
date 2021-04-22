@@ -65,7 +65,8 @@ void main() {
         const vec2 position = i_position[0];
         const vec3 color = i_color[0];
         const float size = i_size[0];
-        brightness = (brightness - blinkThreshold) / (1.f - blinkThreshold);
+        brightness = 2.f * (brightness - blinkThreshold) / (1.f - blinkThreshold);
+        /// brightness = 1.f - pow(brightness - 1.f, 4.f);
 
         _emitSquare(position, vec4(color, brightness), size);
     }

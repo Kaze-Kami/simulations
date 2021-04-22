@@ -46,7 +46,6 @@ set(SRC
         src/core/renderer/buffer/buffer.h
         src/core/renderer/vertex_array/vertex_array.h
         src/core/renderer/vertex_array/vertex_array_layout.h
-        src/core/renderer/imgui/imgui_loader.h
 
         # core/window
         src/core/window/window.h
@@ -73,8 +72,6 @@ set(SRC
         src/platform/windows/glfw_input_controller.h
         src/platform/windows/opengl_context.h
         src/platform/windows/opengl_context.cpp
-        src/platform/windows/imgui_impl.h
-        src/platform/windows/imgui_impl.cpp
         )
 
 # Includes
@@ -93,5 +90,4 @@ endfunction()
 add_vendor_folder(Glad)
 add_vendor_folder(glfw)
 add_vendor_folder(glm)
-add_vendor_folder(imgui)
 add_vendor_folder(spdlog)

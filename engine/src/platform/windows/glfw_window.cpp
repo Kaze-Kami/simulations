@@ -3,10 +3,8 @@
  */
 
 
-#include <glad/glad.h>
-#include <imgui.h>
-
 #include "glfw_window.h"
+
 #include "macros/assert.h"
 #include "macros/gl_call.h"
 
@@ -201,8 +199,6 @@ namespace Engine {
 
         // set mouse callbacks
         glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
-            if (ImGui::GetIO().WantCaptureMouse) return;
-
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             double x, y;
             glfwGetCursorPos(window, &x, &y);
@@ -219,16 +215,12 @@ namespace Engine {
         });
 
         glfwSetScrollCallback(window, [](GLFWwindow* window, double offsetX, double offsetY) {
-            if (ImGui::GetIO().WantCaptureMouse) return;
-
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             data.messageQueue->dispatch(new MouseWheelScrollEvent(float(offsetX), float(offsetY)));
         });
 
         // set key callbacks
         glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scanCode, int action, int mods) {
-            if (ImGui::GetIO().WantCaptureKeyboard) return;
-
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             if (action == GLFW_PRESS) {
                 data.messageQueue->dispatch(new KeyPressEvent(key, mods));
