@@ -75,23 +75,20 @@ private:
             COMPUTE_CLUSTER_SIZE = COMPUTE_CLUSTER_SIZE_X * COMPUTE_CLUSTER_SIZE_Y * COMPUTE_CLUSTER_SIZE_Z,
             NUM_FIREFLIES = COMPUTE_CLUSTERS * COMPUTE_CLUSTER_SIZE;
 
-    // general config
-    static constexpr int NUM_COLORS = 0;
-    static constexpr float SIMULATION_SPEED = .75f;
+    // initial config
+    int numColors = 2;                              // number of colors (0 = continuous)
+    float fireflySize = .015f;                      // size of a firefly
+    float fireflyMaxFrequency = 1.5f;               // max frequency of a firefly
 
-    static constexpr float FIREFLY_SIZE = .005f;                   // size of a firefly
-    static constexpr float BLINK_THRESHOLD = .2f;                 // percentage of one cycle a firefly is lit
-    static constexpr float FIREFLY_MAX_FREQUENCY = 1.5f;           // max frequency of a firefly
-    static constexpr float FIREFLY_MAX_PHASE = TWO_PI;
+    // runtime config
+    float simulationSpeed = 1.f;                 // simulation speed (frequency)
+    float blinkThreshold = .98f;                 // percentage of one cycle a firefly is not lit
 
-    static constexpr float
+    float
             muP = 5e1f,                  // how much nearby fireflies phase effect a 'this' firefly
             muF = 5e1f,                  // how much nearby fireflies frequency effect a 'this' firefly
             epsilonV = 30.f,             // how 'fast' a fireflies vision 'decays'
             epsilonC = 30.f;             // how less 'interesting' different colors are
-
-    // internal
-    static constexpr float OMEGA = SIMULATION_SPEED * TWO_PI;
 
 
     CameraController cameraController = CameraController(glm::vec2(1.f), .1f, "view");
@@ -103,6 +100,8 @@ private:
 
     bool onMouseButtonPressEvent(MouseButtonPressEvent& e);
     bool onKeyPressEvent(KeyPressEvent& e);
+
+    void initFireflies();
 
 };
 
