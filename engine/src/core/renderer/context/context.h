@@ -29,6 +29,10 @@ namespace Engine {
         virtual void setViewport(int x0, int y0, int width, int height) = 0;
         virtual void setMultisample(bool enable) = 0;
 
+        // msc
+        virtual void setFpsCounterEnable(bool enable) = 0;
+        virtual void setFpsCounterColor(glm::vec4 color) = 0;
+
         // opengl util
         virtual void setClearColor(float r, float g, float b, float a) = 0;
         inline virtual void setClearColor(float r, float g, float b) { setClearColor(r, g, b, 1.f); };

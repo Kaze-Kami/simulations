@@ -49,15 +49,28 @@ namespace Engine {
         void setViewport(int x0, int y0, int width, int height) override;
         void setMultisample(bool enable) override;
 
+        void setFpsCounterEnable(bool enable) override;
+        void setFpsCounterColor(glm::vec4 color) override;
+
         void setClearColor(float r, float g, float b, float a) override;
         void setClearFlags(unsigned int flags) override;
 
     private:
         GlfwWindow* window = nullptr;
 
+        // flags
         bool bound = false, vsync = false, multisample = false;
+
+        // viewport data
         int vpX0 = 0, vpY0 = 0, vpWidth = 1, vpHeight = 1;
-        unsigned int clearFlags = 0;
+
+        // fps counter
+        bool fpsCounterEnable = false;
+        glm::vec4 fpsCounterColor = glm::vec4(1.f);
+
+        // defaults for clear: clear color with black
+        glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+        unsigned int clearFlags = GL_COLOR_BUFFER_BIT;
     };
 
 }

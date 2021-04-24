@@ -5,6 +5,7 @@
  */
 
 #include <string>
+#include <glm/glm.hpp>
 
 namespace Engine {
 
@@ -32,6 +33,10 @@ namespace Engine {
         // 'cool' msc flags
         bool overlay = false,
              noTaskbar = false;
+
+        // 'other' flags and data fields
+        bool fpsCounterEnable = false;
+        glm::vec4 fpsCounterColor = glm::vec4(1.f);
     };
 
 }

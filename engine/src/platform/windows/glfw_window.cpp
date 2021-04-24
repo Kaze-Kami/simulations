@@ -155,6 +155,10 @@ namespace Engine {
         // vsync
         context->setVsync(props.vsync);
 
+        // fps counter
+        context->setFpsCounterEnable(props.fpsCounterEnable);
+        context->setFpsCounterColor(props.fpsCounterColor);
+
         // set user point (window data)
         glfwSetWindowUserPointer(window, &data);
 

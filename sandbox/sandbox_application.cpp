@@ -1,7 +1,7 @@
 /*
  * Created by Kami-Kaze on 4/10/2021.
  *  todo (next steps)
- *  - get imgui to work
+ *  -
  */
 
 #include <imgui.h>
@@ -44,11 +44,11 @@ void SandboxApplication::onContextAttach(Context* context) {
     // quad render shader
     shaderList.pushFromFile(
             ShaderType::VERTEX,
-            R"(C:\Development\Projects\simulations\sandbox\resources\vertex_shader.glsl)"
+            R"(resources\vertex_shader.glsl)"
     );
     shaderList.pushFromFile(
             ShaderType::FRAGMENT,
-            R"(C:\Development\Projects\simulations\sandbox\resources\fragment_shader.glsl)"
+            R"(resources\fragment_shader.glsl)"
     );
     renderShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
@@ -86,6 +86,8 @@ void SandboxApplication::setup(Engine::ApplicationProps& props) {
     windowProps.center = true;
     windowProps.multisample = 16;
     windowProps.vsync = true;
+    windowProps.fpsCounterEnable = true;
+    windowProps.fpsCounterColor = glm::vec4(1.f, .1f, .1f, 1.f);
 }
 
 void SandboxApplication::update(float dt) {
