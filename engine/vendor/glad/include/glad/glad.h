@@ -30,7 +30,9 @@
 #define __gl_h_
 
 #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
+#pragma warning( disable : 4005 )
 #define APIENTRY __stdcall
+#pragma warning ( pop )
 #endif
 
 #ifndef APIENTRY

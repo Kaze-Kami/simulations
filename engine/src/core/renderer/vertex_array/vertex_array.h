@@ -33,7 +33,9 @@ namespace Engine {
             for (unsigned int i = 0; i < attributes.size(); i++) {
                 const auto& attribute = attributes[i];
                 GL_CALL(glEnableVertexArrayAttrib(id, i));
+#pragma warning( disable : 4312 )
                 GL_CALL(glVertexAttribPointer(i, attribute.count, attribute.type, attribute.normalize, layout.getStride(), (const void*) offset));
+#pragma warning( pop )
                 offset += attribute.count * attribute.size;
             }
         }
