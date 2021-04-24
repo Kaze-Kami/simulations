@@ -6,6 +6,7 @@
 
 #include <random>
 #include <chrono>
+#include <sstream>
 
 #include <glm/gtx/color_space.hpp>
 
@@ -32,13 +33,18 @@ void FirefliesApplication::setup(ApplicationProps& props) {
     WindowProps& windowProps = props.windowProps;
 
     // simple window
-    props.name = "Fireflies with compute shaders";
-    windowProps.name = "Fireflies";
+    props.name = "Firefly simulation";
+    std::ostringstream ss;
+    ss << "Firefly simulation (" << NUM_FIREFLIES << " fireflies)";
+    windowProps.name = ss.str();
     windowProps.width = 1000;
     windowProps.height = 1000;
     windowProps.center = true;
     windowProps.multisample = 16;
-    // windowProps.vsync = false;
+    // so we can see how much of a margin we got for increasing the number of fireflies
+    windowProps.vsync = false;
+    windowProps.fpsCounterEnable = true;
+    windowProps.fpsCounterColor = glm::vec4(1.f);
 
     /* log some stats */
     LOG_INFO("Num fireflies: {}", NUM_FIREFLIES);
@@ -192,12 +198,6 @@ void FirefliesApplication::onEvent(Event& e) {
 }
 
 void FirefliesApplication::renderImGui() {
-    if (ImGui::Begin("Info")) {
-        ImGui::Text("%d fireflies", NUM_FIREFLIES);
-        ImGui::Text("~%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    }
-    ImGui::End();
-
     if (ImGui::Begin("Settings")) {
         if (ImGui::CollapsingHeader("Setup")) {
             ImGui::DragInt("Num colors", &numColors, 1, 0);
