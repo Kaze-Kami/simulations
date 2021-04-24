@@ -1,7 +1,31 @@
 set(DOCUMENTATION "Blah")
 
 function(add_resource_dir NAME)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    set(__src__ ${CMAKE_CURRENT_SOURCE_DIR}/${NAME})
+    set(__dst__ ${CMAKE_CURRENT_BINARY_DIR}/${NAME})
+
+    set(__dummy__ ${CMAKE_CURRENT_BINARY_DIR}/_${PROJECT_NAME}_${NAME}_.dummy)
+    set(__target__ copy-resources-${PROJECT_NAME}-${NAME})
+
+    add_custom_command(
+            OUTPUT
+                ${__dummy__}
+                ${__dst__}
+
+            DEPENDS
+                ${__src__}
+
+            COMMENT "Copying resources for ${PROJECT_NAME}"
+
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/${NAME})
+                ${__src__}
+                ${__dst__}
+    )
+
+    add_custom_target(
+            ${__target__}
+            DEPENDS ${__dummy__}
+    )
+
+    add_dependencies(${PROJECT_NAME} ${__target__})
 endfunction()
