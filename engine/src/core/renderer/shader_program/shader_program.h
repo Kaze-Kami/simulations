@@ -36,6 +36,12 @@ namespace Engine {
             uploadUniformImpl(getUniformLocation(uniform.name), uniform);
         }
 
+        template<typename T>
+        inline void uploadUniformV(const std::string& name, T value) {
+            CORE_ASSERT(isBound(id), "Shader needs to be bound to upload uniforms!");
+            uploadUniformImpl(getUniformLocation(name), value);
+        }
+
         static ShaderProgram* createProgram(const ShaderList& shaderList);
 
     private:
@@ -51,7 +57,7 @@ namespace Engine {
         static unsigned int linkProgram(const ShaderList& shaderList);
 
         template<typename T>
-        inline void uploadUniformImpl(const int, const Uniform<T>&) {
+        inline void uploadUniformImpl(const int, T) {
             CORE_ASSERT(false, "Call to non-specialized template function!");
         }
 
@@ -60,28 +66,33 @@ namespace Engine {
          */
 
         template<>
-        inline void uploadUniformImpl<glm::mat4>(const int location, const Uniform<glm::mat4>& u) {
-            GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(u.data)));
+        inline void uploadUniformImpl<glm::mat4>(const int location, glm::mat4 data) {
+            GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(data)));
         }
 
         template<>
-        inline void uploadUniformImpl<glm::vec4>(const int location, const Uniform<glm::vec4>& u) {
-            GL_CALL(glUniform4fv(location, 1, glm::value_ptr(u.data)));
+        inline void uploadUniformImpl<glm::vec4>(const int location, glm::vec4 data) {
+            GL_CALL(glUniform4fv(location, 1, glm::value_ptr(data)));
         }
 
         template<>
-        inline void uploadUniformImpl<glm::vec3>(const int location, const Uniform<glm::vec3>& u) {
-            GL_CALL(glUniform3fv(location, 1, glm::value_ptr(u.data)));
+        inline void uploadUniformImpl<glm::vec3>(const int location, glm::vec3 data) {
+            GL_CALL(glUniform3fv(location, 1, glm::value_ptr(data)));
         }
 
         template<>
-        inline void uploadUniformImpl<glm::vec2>(const int location, const Uniform<glm::vec2>& u) {
-            GL_CALL(glUniform2fv(location, 1, glm::value_ptr(u.data)));
+        inline void uploadUniformImpl<glm::vec2>(const int location, glm::vec2 data) {
+            GL_CALL(glUniform2fv(location, 1, glm::value_ptr(data)));
         }
 
         template<>
-        inline void uploadUniformImpl<float>(const int location, const Uniform<float>& u) {
-            GL_CALL(glUniform1f(location, u.data));
+        inline void uploadUniformImpl<float>(const int location, const float data) {
+            GL_CALL(glUniform1f(location, data));
+        }
+
+        template<>
+        inline void uploadUniformImpl<int>(const int location, const int data) {
+            GL_CALL(glUniform1f(location, data));
         }
     };
 
