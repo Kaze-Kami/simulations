@@ -1,7 +1,7 @@
-project(fireflies_cs)
+project(n_bodies)
 
 # Source files
-set(SRC fireflies_cs_main.cpp fireflies_cs_application.cpp fireflies_cs_application.h)
+set(SRC n_bodies_main.cpp n_bodies_application.h n_bodies_application.cpp)
 
 # Includes
 set(INCLUDE src)
