@@ -23,8 +23,8 @@ namespace Engine {
         if (it == uniformLocations.end()) {
             // not registered -> fetch and cache
             GL_CALL(int location = glGetUniformLocation(id, name.c_str()));
+            if (location == -1) LOG_CORE_WARN("Failed to retrieve location for uniform \"{}\"", name);
             uniformLocations.insert(std::make_pair(name, location));
-
             return location;
         }
 

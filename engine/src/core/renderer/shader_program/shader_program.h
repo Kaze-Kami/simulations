@@ -33,7 +33,7 @@ namespace Engine {
         template<typename T>
         inline void uploadUniform(const Uniform<T>& uniform) {
             CORE_ASSERT(isBound(id), "Shader needs to be bound to upload uniforms!");
-            uploadUniformImpl(getUniformLocation(uniform.name), uniform);
+            uploadUniformImpl(getUniformLocation(uniform.name), uniform.data);
         }
 
         template<typename T>
