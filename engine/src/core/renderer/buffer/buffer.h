@@ -29,6 +29,7 @@ namespace Engine {
             GL_CALL(glCreateBuffers(1, &id));
 
             // buffer data
+            //! todo: check if some other buffer was bound before and if so, rebind it after
             bind();
             GL_CALL(glBufferData(type, itemCount * itemSize, data, accessMode));
             unbind();
