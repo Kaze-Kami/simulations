@@ -2,7 +2,7 @@
  * Created by Kami-Kaze on 4/11/2021.
  */
 
-#include "fireflies_cs_application.h"
+#include "fireflies_application.h"
 
 #include <random>
 #include <chrono>
@@ -16,19 +16,19 @@
 
 /** Class implementation */
 
-void FirefliesCsApplication::init() {
+void FirefliesApplication::init() {
     Application::init();
 
     // todo: init
 }
 
-void FirefliesCsApplication::shutdown() {
+void FirefliesApplication::shutdown() {
     // todo: shutdown
 
     Application::shutdown();
 }
 
-void FirefliesCsApplication::setup(ApplicationProps& props) {
+void FirefliesApplication::setup(ApplicationProps& props) {
     WindowProps& windowProps = props.windowProps;
 
     // simple window
@@ -44,7 +44,7 @@ void FirefliesCsApplication::setup(ApplicationProps& props) {
     LOG_INFO("Num fireflies: {}", NUM_FIREFLIES);
 }
 
-void FirefliesCsApplication::onContextAttach(Context* context) {
+void FirefliesApplication::onContextAttach(Context* context) {
     /** init opengl buffers and vertex array */
     initFireflies();
 
@@ -58,15 +58,15 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
     // quad render shader
     shaderList.pushFromFile(
             ShaderType::VERTEX,
-            R"(C:\Development\Projects\simulations\projects\fireflies_cs\resources\vertex_shader.glsl)"
+            R"(resources\vertex_shader.glsl)"
     );
     shaderList.pushFromFile(
             ShaderType::GEOMETRY,
-            R"(C:\Development\Projects\simulations\projects\fireflies_cs\resources\geometry_shader.glsl)"
+            R"(resources\geometry_shader.glsl)"
     );
     shaderList.pushFromFile(
             ShaderType::FRAGMENT,
-            R"(C:\Development\Projects\simulations\projects\fireflies_cs\resources\fragment_shader.glsl)"
+            R"(resources\fragment_shader.glsl)"
     );
     renderShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
@@ -81,7 +81,7 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
     // change compute shader
     shaderList.pushFromFile(
             ShaderType::COMPUTE,
-            R"(C:\Development\Projects\simulations\projects\fireflies_cs\resources\compute_shader.glsl)"
+            R"(resources\compute_shader.glsl)"
     );
     computeShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
@@ -100,11 +100,11 @@ void FirefliesCsApplication::onContextAttach(Context* context) {
     context->setClearFlags(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void FirefliesCsApplication::onContextDetach(Context* context) {
+void FirefliesApplication::onContextDetach(Context* context) {
     // todo: shut down opengl
 }
 
-void FirefliesCsApplication::update(float dt) {
+void FirefliesApplication::update(float dt) {
     // update phi
     uDPhi.data = dt * simulationSpeed * TWO_PI;
 
@@ -156,7 +156,7 @@ void FirefliesCsApplication::update(float dt) {
 #endif
 }
 
-void FirefliesCsApplication::render(Context* context) {
+void FirefliesApplication::render(Context* context) {
     // bind shader
     renderShader->use();
     // maybe update view
@@ -168,7 +168,7 @@ void FirefliesCsApplication::render(Context* context) {
     GL_CALL(glDrawArraysInstanced(GL_POINTS, 0, 1, NUM_FIREFLIES));
 }
 
-bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
+bool FirefliesApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
     if (e.code == Mouse::ButtonLeft) {
         Camera& camera = cameraController.getCamera();
         glm::vec4 worldAt = camera.applyInverse(glm::vec4(e.pos.x, e.pos.y, 0.f, 1.f));
@@ -177,7 +177,7 @@ bool FirefliesCsApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
     return false;
 }
 
-bool FirefliesCsApplication::onKeyPressEvent(KeyPressEvent& e) {
+bool FirefliesApplication::onKeyPressEvent(KeyPressEvent& e) {
     if (e.code == Key::C) {
         cameraController.resetCamera();
         return true;
@@ -185,13 +185,13 @@ bool FirefliesCsApplication::onKeyPressEvent(KeyPressEvent& e) {
     return false;
 }
 
-void FirefliesCsApplication::onEvent(Event& e) {
+void FirefliesApplication::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
-    dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesCsApplication::onMouseButtonPressEvent));
-    dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesCsApplication::onKeyPressEvent));
+    dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesApplication::onMouseButtonPressEvent));
+    dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesApplication::onKeyPressEvent));
 }
 
-void FirefliesCsApplication::renderImGui() {
+void FirefliesApplication::renderImGui() {
     if (ImGui::Begin("Info")) {
         ImGui::Text("%d fireflies", NUM_FIREFLIES);
         ImGui::Text("~%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -206,6 +206,20 @@ void FirefliesCsApplication::renderImGui() {
 
             if (ImGui::Button("Restart")) {
                 initFireflies();
+            }
+
+            for (int i = 0; i < numColorsLoaded; i++) {
+                const float hue = float(i) / float(numColors);
+
+                ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4) ImColor::HSV(hue, 1.f, 1.f));
+
+                ImGui::PushID(i);
+                // todo: does nothing as of now
+                ImGui::Checkbox("Show color", &enableColors[i]);
+                ImGui::SameLine(); ImGui::Button("  ");
+                ImGui::PopID();
+
+                ImGui::PopStyleColor();
             }
         }
 
@@ -236,7 +250,7 @@ void FirefliesCsApplication::renderImGui() {
     ImGui::End();
 }
 
-void FirefliesCsApplication::initFireflies() {
+void FirefliesApplication::initFireflies() {
     /** init data */
     //! use heap (stack is not big enough if we want a lot of fireflies!)
     FireflyData* fireflies = new FireflyData[NUM_FIREFLIES];
@@ -268,7 +282,7 @@ void FirefliesCsApplication::initFireflies() {
                 static float sHue = dist01(engine) * 360.f;
                 hue = sHue;
             } else if (0 < numColors) {
-                hue = 10 + glm::floor(dist01(engine) * float(numColors)) * 350.f / numColors;
+                hue = glm::floor(dist01(engine) * float(numColors)) * 350.f / float(numColors);
             } else {
                 hue = dist01(engine) * 360.f;
             }
@@ -291,7 +305,7 @@ void FirefliesCsApplication::initFireflies() {
     }
 
     // create compute buffer
-    if (computeBuffer != nullptr) delete computeBuffer;
+    delete computeBuffer;
 
     computeBuffer = new Buffer<FireflyData>(
             BufferType::SHADER_STORAGE_BUFFER,
@@ -306,4 +320,12 @@ void FirefliesCsApplication::initFireflies() {
 
     // our data arrays are not needed anymore now
     delete[] fireflies;
+
+    // update color stuff
+    numColorsLoaded = numColors;
+    delete enableColors;
+    enableColors = new bool[numColors];
+    for (int i = 0; i < numColors; i++) {
+        enableColors[i] = true;
+    }
 }

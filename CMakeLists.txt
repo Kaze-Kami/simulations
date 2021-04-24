@@ -8,6 +8,10 @@ set(CMAKE_CXX_STANDARD 20)
 # ################################################################# #
 add_subdirectory(engine)
 
+# append cmake utilities to CMAKE_MODULE_PATH
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/engine/cmake_modules)
+include(add_resources REQUIRED)
+
 
 # ################################################################# #
 #                        Engine Test (Sandbox)                      #

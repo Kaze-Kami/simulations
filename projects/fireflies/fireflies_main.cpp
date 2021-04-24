@@ -4,7 +4,7 @@
 
 #include <core/entry_point.h>
 
-#include "fireflies_cs_application.h"
+#include "fireflies_application.h"
 
 using namespace Engine;
 
@@ -13,5 +13,5 @@ int main() {
 }
 
 Application* Application::createApplication() {
-    return new FirefliesCsApplication();
+    return new FirefliesApplication();
 }

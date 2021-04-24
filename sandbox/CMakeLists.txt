@@ -15,3 +15,6 @@ add_compile_definitions(_ASSERTS_ENABLE=1)
 set(LIBS engine)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBS})
+
+# add resources
+add_resource_dir(resources)

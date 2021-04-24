@@ -30,7 +30,7 @@ struct FireflyData {
     float nudgePhi = 0, nudgeFrequency = 0;
 };
 
-class FirefliesCsApplication : public Application {
+class FirefliesApplication : public Application {
     /* Inherited methods */
 public:
     // those two are probably not needed
@@ -76,13 +76,14 @@ private:
             NUM_FIREFLIES = COMPUTE_CLUSTERS * COMPUTE_CLUSTER_SIZE;
 
     // initial config
-    int numColors = 2;                              // number of colors (0 = continuous)
-    float fireflySize = .015f;                      // size of a firefly
-    float fireflyMaxFrequency = 1.5f;               // max frequency of a firefly
+    int numColors = 2, numColorsLoaded = numColors;         // number of colors (0 = continuous)
+    bool* enableColors = nullptr;
+    float fireflySize = .015f;                              // size of a firefly
+    float fireflyMaxFrequency = 1.5f;                       // max frequency of a firefly
 
     // runtime config
-    float simulationSpeed = 1.f;                 // simulation speed (frequency)
-    float blinkThreshold = .98f;                 // percentage of one cycle a firefly is not lit
+    float simulationSpeed = 1.f;                    // simulation speed (frequency)
+    float blinkThreshold = .6f;                     // percentage of one cycle a firefly is not lit
 
     float
             muP = 5e1f,                  // how much nearby fireflies phase effect a 'this' firefly
