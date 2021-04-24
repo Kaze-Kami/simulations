@@ -4,11 +4,15 @@
 #define ONE_OVER_SQRT_3 0.577350269189625764509148780501
 
 struct Firefly {
-    vec2 position;      /* x, y + 2 x padding */
-    vec3 color;         /* r, g, b + 1 x padding */
+    vec2 position;      // x, y
+    // 2x padding
+    vec3 color;         // r, g, b
+    // 1x padding
     float size;
     float phi, frequency;
     float nudgePhi, nudgeFrequency;
+    // 3x padding
+    int colorIndex;
 };
 
 layout (local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = LOCAL_SIZE) in;

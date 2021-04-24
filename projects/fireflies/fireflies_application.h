@@ -21,13 +21,15 @@ using namespace Engine;
 
 struct FireflyData {
     glm::vec2 position = glm::vec2(0.f);
-    float _p3 = 0, _p4 = 0;                        // padding
+    float _p3 = 0, _p4 = 0;                         // padding
 
     glm::vec3 color = glm::vec3(0.f);
 
     float size = 0;
     float phi = 0, frequency = 0;
     float nudgePhi = 0, nudgeFrequency = 0;
+    int colorIndex;
+    float _n0 = 0, _n1 = 0, _n2 = 0;                // padding again...
 };
 
 class FirefliesApplication : public Application {
@@ -56,10 +58,10 @@ protected:
     void onEvent(Event& e) override;
 
 private:
+    // todo: clean up this variable shit below
+
     /* constants */
     static constexpr float TWO_PI = glm::radians(360.f);
-
-    /* todo: put this somewhere (aka get your ass up and add imgui support lol)*/
 
     // opengl config
     static constexpr int
@@ -77,25 +79,35 @@ private:
 
     // initial config
     int numColors = 2, numColorsLoaded = numColors;         // number of colors (0 = continuous)
-    bool* enableColors = nullptr;
+    bool zeroColors = numColorsLoaded == 0;
+    int* enableColors = nullptr;
     float fireflySize = .015f;                              // size of a firefly
     float fireflyMaxFrequency = 1.5f;                       // max frequency of a firefly
 
     // runtime config
-    float simulationSpeed = 1.f;                    // simulation speed (frequency)
-    float blinkThreshold = .6f;                     // percentage of one cycle a firefly is not lit
+    float simulationSpeed = .8f;                    // simulation speed (frequency)
+    float blinkThreshold = .1f;                     // percentage of one cycle a firefly is not lit
+
+    // msc
+    bool paused = false, holding = false;
 
     float
+            tElapsed = 0,
             muP = 5e1f,                  // how much nearby fireflies phase effect a 'this' firefly
             muF = 5e1f,                  // how much nearby fireflies frequency effect a 'this' firefly
             epsilonV = 30.f,             // how 'fast' a fireflies vision 'decays'
             epsilonC = 30.f;             // how less 'interesting' different colors are
 
+    // testing/tmp
+    float brightnessFalloff = 1.f;
+
 
     CameraController cameraController = CameraController(glm::vec2(1.f), .1f, "view");
     ShaderProgram* renderShader = nullptr;
     ShaderProgram* computeShader = nullptr;
-    Buffer<FireflyData>* computeBuffer;
+
+    Buffer<FireflyData>* computeBuffer = nullptr;
+    Buffer<int>* colorBuffer = nullptr;
 
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
 

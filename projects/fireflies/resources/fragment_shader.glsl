@@ -1,9 +1,5 @@
 #version 450 core
 
-/* from geometry shader:
- *     layout (location = 0) out vec4 o_color;
- */
-
 struct Vertex {
     vec4 color;
     vec2 position;
