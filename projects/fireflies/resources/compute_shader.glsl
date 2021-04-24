@@ -21,8 +21,8 @@ layout (std430, binding = 0) buffer FireflyBufferLayout {
     Firefly fireflies[];
 };
 
-uniform float epsilonV;
-uniform float epsilonC;
+uniform float muVision;
+uniform float muColor;
 
 void main() {
     // get our id
@@ -64,7 +64,7 @@ void main() {
         // sim := pow(sqrt(3) - ||aCol - bCol||, eC);
         // vis := pow(1.f + ||aPos - bPos||, eV);
         // mu := c * sim / vis
-        const float mu = c * pow(1.f - distance(aColor, bColor) * ONE_OVER_SQRT_3, epsilonC) / pow(1.f + dist, epsilonV);
+        const float mu = c * pow(1.f - distance(aColor, bColor) * ONE_OVER_SQRT_3, muColor) / pow(1.f + dist, muVision);
 
         /* calculate nudge from this interaction */
 

@@ -31,27 +31,6 @@ void FirefliesApplication::shutdown() {
     Application::shutdown();
 }
 
-void FirefliesApplication::setup(ApplicationProps& props) {
-    WindowProps& windowProps = props.windowProps;
-
-    // simple window
-    props.name = "Firefly simulation";
-    std::ostringstream ss;
-    ss << "Firefly simulation (" << NUM_FIREFLIES << " fireflies)";
-    windowProps.name = ss.str();
-    windowProps.width = 1000;
-    windowProps.height = 1000;
-    windowProps.center = true;
-    windowProps.multisample = 16;
-    // so we can see how much of a margin we got for increasing the number of fireflies
-    windowProps.vsync = false;
-    windowProps.fpsCounterEnable = true;
-    windowProps.fpsCounterColor = glm::vec4(1.f);
-
-    /* log some stats */
-    LOG_INFO("Num fireflies: {}", NUM_FIREFLIES);
-}
-
 void FirefliesApplication::onContextAttach(Context* context) {
     /** init opengl buffers and vertex array */
     initFireflies();
@@ -77,10 +56,9 @@ void FirefliesApplication::onContextAttach(Context* context) {
 
     /* push uniforms */
     renderShader->use();
-    renderShader->uploadUniform(Uniform("muP", muP));
-    renderShader->uploadUniform(Uniform("muF", muF));
-    renderShader->uploadUniform(Uniform("blinkThreshold", blinkThreshold));
-    renderShader->uploadUniform(Uniform("brightnessFalloff", brightnessFalloff));
+    renderShader->uploadUniform(epsilon);
+    renderShader->uploadUniform(blinkThreshold);
+    renderShader->uploadUniform(brightnessFalloff);
     renderShader->uploadUniform(cameraController.getCamera().getUniform());
 
     // change compute shader
@@ -93,8 +71,8 @@ void FirefliesApplication::onContextAttach(Context* context) {
 
     /* push uniforms */
     computeShader->use();
-    computeShader->uploadUniform(Uniform("epsilonV", epsilonV));
-    computeShader->uploadUniform(Uniform("epsilonC", epsilonC));
+    computeShader->uploadUniform(muVision);
+    computeShader->uploadUniform(muColor);
 
     // set blend
     GL_CALL(glEnable(GL_BLEND));
@@ -107,6 +85,27 @@ void FirefliesApplication::onContextAttach(Context* context) {
 
 void FirefliesApplication::onContextDetach(Context* context) {
     // todo: shut down opengl
+}
+
+void FirefliesApplication::setup(ApplicationProps& props) {
+    WindowProps& windowProps = props.windowProps;
+
+    // simple window
+    props.name = "Firefly simulation";
+    std::ostringstream ss;
+    ss << "Firefly simulation (" << NUM_FIREFLIES << " fireflies)";
+    windowProps.name = ss.str();
+    windowProps.width = 1000;
+    windowProps.height = 1000;
+    windowProps.center = true;
+    windowProps.multisample = 16;
+    // so we can see how much of a margin we got for increasing the number of fireflies
+    windowProps.vsync = false;
+    windowProps.fpsCounterEnable = true;
+    windowProps.fpsCounterColor = glm::vec4(1.f);
+
+    /* log some stats */
+    LOG_INFO("Num fireflies: {}", NUM_FIREFLIES);
 }
 
 void FirefliesApplication::update(float dt) {
@@ -201,29 +200,6 @@ void FirefliesApplication::render(Context* context) {
 #endif
 }
 
-bool FirefliesApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
-    if (e.code == Mouse::ButtonLeft) {
-        Camera& camera = cameraController.getCamera();
-        glm::vec4 worldAt = camera.applyInverse(glm::vec4(e.pos.x, e.pos.y, 0.f, 1.f));
-        LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e.pos.x, e.pos.y, worldAt.x, worldAt.y);
-    }
-    return false;
-}
-
-bool FirefliesApplication::onKeyPressEvent(KeyPressEvent& e) {
-    if (e.code == Key::C) {
-        cameraController.resetCamera();
-        return true;
-    }
-    return false;
-}
-
-void FirefliesApplication::onEvent(Event& e) {
-    EventDispatcher dispatcher(e);
-    dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesApplication::onMouseButtonPressEvent));
-    dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesApplication::onKeyPressEvent));
-}
-
 void FirefliesApplication::renderImGui() {
     if (ImGui::Begin("Stats")) {
         ImGui::Text("Total phi:"); ImGui::SameLine(); ImGui::Text("%.4f", tElapsed);
@@ -237,8 +213,12 @@ void FirefliesApplication::renderImGui() {
         ImGui::Text("= %d fireflies", NUM_FIREFLIES);
         ImGui::Unindent(4);
         ImGui::Text("Num colors:"); ImGui::SameLine(); ImGui::Text("%d", zeroColors ? 0 : numColorsLoaded);
+        if (paused) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
         ImGui::Text("Paused: %s", paused ? "true" : "false");
+        if (paused) ImGui::PopStyleColor();
+        if (holding) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
         ImGui::Text("Holding: %s", holding ? "true" : "false");
+        if (holding) ImGui::PopStyleColor();
     }
     ImGui::End();
 
@@ -258,12 +238,10 @@ void FirefliesApplication::renderImGui() {
             if (holding) {
                 // pause 'learning' of fireflies
                 renderShader->use();
-                renderShader->uploadUniform(Uniform("muP", 0.f));
-                renderShader->uploadUniform(Uniform("muP", 0.f));
+                renderShader->uploadUniform(Uniform("epsilon", 0.f));
             } else {
                 renderShader->use();
-                renderShader->uploadUniform(Uniform("muP", muP));
-                renderShader->uploadUniform(Uniform("muP", muF));
+                renderShader->uploadUniform(epsilon);
             }
         }
     }
@@ -271,31 +249,27 @@ void FirefliesApplication::renderImGui() {
 
     if (ImGui::Begin("Settings")) {
         if (ImGui::CollapsingHeader("Parameters")) {
-            if (ImGui::DragFloat("Mu phase", &muP, 1.f, 0.f)) {
+            if (ImGui::DragFloat("Epsilon", &epsilon.data, 1.f, 0.f)) {
                 renderShader->use();
-                renderShader->uploadUniform(Uniform("muP", muP));
+                renderShader->uploadUniform(epsilon);
             }
-            if (ImGui::DragFloat("Mu frequency", &muF, 1.f, 0.f)) {
-                renderShader->use();
-                renderShader->uploadUniform(Uniform("muF", muF));
-            }
-            if (ImGui::DragFloat("Epsilon vision", &epsilonV, 1.f, 0.f)) {
+            if (ImGui::DragFloat("Mu vision", &muVision.data, 1.f, 0.f)) {
                 computeShader->use();
-                computeShader->uploadUniform(Uniform("epsilonV", epsilonV));
+                computeShader->uploadUniform(muVision);
             }
-            if (ImGui::DragFloat("Epsilon color", &epsilonC, 1.f, 0.f)) {
+            if (ImGui::DragFloat("Mu color", &muColor.data, 1.f, 0.f)) {
                 computeShader->use();
-                computeShader->uploadUniform(Uniform("epsilonC", epsilonC));
+                computeShader->uploadUniform(muColor);
             }
         }
 
         if (ImGui::CollapsingHeader("Color")) {
-            if (ImGui::DragFloat("Blink threshold", &blinkThreshold, .001f, 0.f, 1.f)) {
+            if (ImGui::DragFloat("Blink threshold", &blinkThreshold.data, .001f, 0.f, 1.f)) {
                 renderShader->use();
-                renderShader->uploadUniform(Uniform("blinkThreshold", blinkThreshold));
+                renderShader->uploadUniform(blinkThreshold);
             }
-            if (ImGui::DragFloat("Brightness falloff", &brightnessFalloff, .01f, 0.f, 2.f)) {
-                renderShader->uploadUniform(Uniform("brightnessFalloff", brightnessFalloff));
+            if (ImGui::DragFloat("Brightness falloff", &brightnessFalloff.data, .01f, 0.f, 2.f)) {
+                renderShader->uploadUniform(brightnessFalloff);
             }
 
             if (!zeroColors) {
@@ -330,6 +304,29 @@ void FirefliesApplication::renderImGui() {
         }
     }
     ImGui::End();
+}
+
+void FirefliesApplication::onEvent(Event& e) {
+    EventDispatcher dispatcher(e);
+    dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesApplication::onMouseButtonPressEvent));
+    dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesApplication::onKeyPressEvent));
+}
+
+bool FirefliesApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
+    if (e.code == Mouse::ButtonLeft) {
+        Camera& camera = cameraController.getCamera();
+        glm::vec4 worldAt = camera.applyInverse(glm::vec4(e.pos.x, e.pos.y, 0.f, 1.f));
+        LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e.pos.x, e.pos.y, worldAt.x, worldAt.y);
+    }
+    return false;
+}
+
+bool FirefliesApplication::onKeyPressEvent(KeyPressEvent& e) {
+    if (e.code == Key::C) {
+        cameraController.resetCamera();
+        return true;
+    }
+    return false;
 }
 
 void FirefliesApplication::initFireflies() {

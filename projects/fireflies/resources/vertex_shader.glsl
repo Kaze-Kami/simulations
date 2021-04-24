@@ -30,9 +30,7 @@ layout (location = 4) out int o_enable;
 
 
 uniform float dPhi;
-
-uniform float muP;
-uniform float muF;
+uniform float epsilon;
 
 void main() {
     // get num fireflies
@@ -47,8 +45,8 @@ void main() {
     Firefly f = fireflies[index];
 
     // update phase, frequency and clock
-    f.phi += f.nudgePhi * muP * dPhi;
-    f.frequency += f.nudgeFrequency * muF * dPhi;
+    f.phi += f.nudgePhi * epsilon * dPhi;
+    f.frequency += f.nudgeFrequency * epsilon * dPhi;
 
     // update phi
     f.phi = mod(f.phi + dPhi * f.frequency, TAU);
