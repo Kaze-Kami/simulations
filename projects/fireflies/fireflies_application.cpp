@@ -146,7 +146,19 @@ void FirefliesApplication::update(float dt) {
     }
 #endif
 
-    const float rd = paused ? 0.f : dt * simulationSpeed;
+    /* update camera */
+    InputController* controller = getWindow()->getInputController();
+    cameraController.update(controller);
+
+    /* calculate change */
+
+    //! side note: we need to run the compute shader once
+    //!          : after pausing so our nudges get zeroed out
+    //!          : and update does nothing in later passes
+    if (paused && !justPaused) return;
+    justPaused = false;
+
+    const float rd = dt * simulationSpeed * float((paused ? 0 : 1));
     // update elapsed time
     tElapsed += rd;
     // update phi
@@ -166,10 +178,6 @@ void FirefliesApplication::update(float dt) {
     computeShader->use();
     GL_CALL(glDispatchCompute(COMPUTE_CLUSTERS_X, COMPUTE_CLUSTERS_Y, COMPUTE_CLUSTERS_Z));
     GL_CALL(glMemoryBarrier(GL_SHADER_STORAGE_BUFFER));
-
-    // update camera based on input
-    InputController* controller = getWindow()->getInputController();
-    cameraController.update(controller);
 #if DEBUG_GPU
     /* for testing: map buffers before update so we can read them */
     computeBuffer->bind();
@@ -224,6 +232,7 @@ void FirefliesApplication::render(Context* context) {
 }
 
 /** helper functions for building ui */
+
 void UniformDragFloat(const char* name, Uniform<float>& u, ShaderProgram* shader,
                       float v_speed=1.f, float v_min=0.f, float v_max=0.f) {
     //! use u.name as id as uniform names are (or at least should be) unique.
@@ -280,6 +289,7 @@ void FirefliesApplication::renderImGui() {
         ImGui::SameLine();
         if (ImGui::Button(paused ? "Resume" : "Pause")) {
             paused = !paused;
+            if (paused) justPaused = true;
         }
         ImGui::SameLine();
         if (ImGui::Button(holding ? "Free" : "Hold")) {

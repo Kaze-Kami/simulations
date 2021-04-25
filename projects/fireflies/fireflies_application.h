@@ -37,7 +37,7 @@ struct FireflyData {
 class FirefliesApplication : public Application {
 private:
     // playback state
-    bool paused = false, holding = false;
+    bool paused = false, holding = false, justPaused = false;
     float tElapsed = 0;
 
     /*
@@ -46,7 +46,7 @@ private:
     static constexpr int
             COMPUTE_CLUSTERS_X = 3,
             COMPUTE_CLUSTERS_Y = 3,
-            COMPUTE_CLUSTERS_Z = 2,
+            COMPUTE_CLUSTERS_Z = 3,
             COMPUTE_CLUSTER_SIZE_BASE = 10,
 
     COMPUTE_CLUSTER_SIZE_X = COMPUTE_CLUSTER_SIZE_BASE,
