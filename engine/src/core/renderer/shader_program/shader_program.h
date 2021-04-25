@@ -92,7 +92,7 @@ namespace Engine {
 
         template<>
         inline void uploadUniformImpl<int>(const int location, const int data) {
-            GL_CALL(glUniform1f(location, data));
+            GL_CALL(glUniform1i(location, data));
         }
     };
 
