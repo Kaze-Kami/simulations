@@ -54,7 +54,7 @@ void FirefliesApplication::onContextAttach(Context* context) {
     renderShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
 
-    /* push uniforms */
+    /* push initial uniforms */
     renderShader->use();
     renderShader->uploadUniform(epsilon);
     renderShader->uploadUniform(blinkThreshold);
@@ -65,6 +65,18 @@ void FirefliesApplication::onContextAttach(Context* context) {
     renderShader->uploadUniform(attractorRange);
     renderShader->uploadUniform(attractorStrength);
     renderShader->uploadUniform(attractorPosition);
+
+    renderShader->uploadUniform(renderCenter);
+    renderShader->uploadUniform(centerLightBase);
+    renderShader->uploadUniform(centerLightMu);
+    renderShader->uploadUniform(centerDarkBase);
+    renderShader->uploadUniform(centerDarkMu);
+
+    renderShader->uploadUniform(renderGlow);
+    renderShader->uploadUniform(glowLightBase);
+    renderShader->uploadUniform(glowLightMu);
+    renderShader->uploadUniform(glowDarkBase);
+    renderShader->uploadUniform(glowDarkMu);
 
     // change compute shader
     shaderList.pushFromFile(
@@ -211,6 +223,29 @@ void FirefliesApplication::render(Context* context) {
 #endif
 }
 
+/** helper functions for building ui */
+void UniformDragFloat(const char* name, Uniform<float>& u, ShaderProgram* shader,
+                      float v_speed=1.f, float v_min=0.f, float v_max=0.f) {
+    //! use u.name as id as uniform names are (or at least should be) unique.
+    //! in case multiple elements respond to input on one element
+    //! the error is most likely caused by non-unique uniform names.
+    ImGui::PushID(u.name.c_str());
+    if (ImGui::DragFloat(name, &u.data, v_speed, v_min, v_max)) {
+        shader->use();
+        shader->uploadUniform(u);
+    }
+    ImGui::PopID();
+}
+
+void UniformBool(const char* name, Uniform<int>& u, ShaderProgram* shader) {
+    bool enable = u.data;
+    if (ImGui::Checkbox(name, &enable)) {
+        u.data = enable;
+        shader->use();
+        shader->uploadUniform(u);
+    }
+}
+
 void FirefliesApplication::renderImGui() {
     if (ImGui::Begin("Stats")) {
         ImGui::Text("Total phi:"); ImGui::SameLine(); ImGui::Text("%.4f", tElapsed);
@@ -278,13 +313,8 @@ void FirefliesApplication::renderImGui() {
         }
 
         if (ImGui::CollapsingHeader("Color")) {
-            if (ImGui::DragFloat("Blink threshold", &blinkThreshold.data, .001f, 0.f, 1.f)) {
-                renderShader->use();
-                renderShader->uploadUniform(blinkThreshold);
-            }
-            if (ImGui::DragFloat("Brightness falloff", &brightnessFalloff.data, .001f, 0.f, 2.f)) {
-                renderShader->uploadUniform(brightnessFalloff);
-            }
+            UniformDragFloat("Blink threshold", blinkThreshold, renderShader, .001f, 0.f, 1.f);
+            UniformDragFloat("Brightness falloff", brightnessFalloff, renderShader, .001f, 0.f, 2.f);
 
             if (!zeroColors) {
                 ImGui::Text("Enabled Colors: ");
@@ -309,6 +339,27 @@ void FirefliesApplication::renderImGui() {
                     if (i < numColorsLoaded - 1) ImGui::SameLine();
                 }
             }
+
+            UniformBool("Center", renderCenter, renderShader);
+
+            ImGui::Indent(4.f);
+            UniformDragFloat("Light base", centerLightBase, renderShader, .001f, 0.f, 1.f);
+            UniformDragFloat("Light mu", centerLightMu, renderShader, .001f, 0.f, 20.f);
+
+            UniformDragFloat("Dark base", centerDarkBase, renderShader, .001f, 0.f, 1.f);
+            UniformDragFloat("Dark mu", centerDarkMu, renderShader, .001f, 0.f, 20.f);
+            ImGui::Unindent(4.f);
+
+            UniformBool("Glow", renderGlow, renderShader);
+
+            ImGui::Indent(4.f);
+            UniformDragFloat("Light base", glowLightBase, renderShader, .001f, 0.f, 1.f);
+            UniformDragFloat("Light mu", glowLightMu, renderShader, .001f, 0.f, 20.f);
+
+            UniformDragFloat("Dark base", glowDarkBase, renderShader, .001f, 0.f, 1.f);
+            UniformDragFloat("Dark mu", glowDarkMu, renderShader, .001f, 0.f, 20.f);
+            ImGui::Unindent(4.f);
+
         }
 
         if (ImGui::CollapsingHeader("Attractor")) {
@@ -383,8 +434,7 @@ void FirefliesApplication::initFireflies() {
     auto* fireflies = new FireflyData[NUM_FIREFLIES];
 
     // fill arrays
-    std::mt19937 engine;
-    engine.seed(std::chrono::system_clock::now().time_since_epoch().count());
+    std::mt19937 engine(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<float> dist01(0, 1);
     std::uniform_real_distribution<float> dist11(-1, 1);
 

@@ -59,7 +59,7 @@ private:
     /*
      * base config
      */
-    int numColors = 2;
+    int numColors = 5;
     float fireflySize = .015f;                              // size of a firefly
     float fireflyMaxFrequency = 1.5f;                       // max frequency of a firefly
 
@@ -84,10 +84,14 @@ private:
      */
 
     float simulationSpeed = .8f;
-    Uniform<float> epsilon = Uniform<float>("epsilon", 5e1f);
+    Uniform<float> epsilon = Uniform<float>("epsilon", 1e2f);
     Uniform<float> muVision = Uniform<float>("muVision", 3e1f);
-    Uniform<float> muColor = Uniform<float>("muColor", 3e1f);
+    Uniform<float> muColor = Uniform<float>("muColor", 5e0f);
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
+
+    /*
+     * Attractor
+     */
     Uniform<int> attractorEnable = Uniform<int>("attractorEnable", 0);
     Uniform<float> attractorRange = Uniform<float>("attractorRange", .2f);
     Uniform<float> attractorStrength = Uniform<float>("attractorStrength", 1.f);
@@ -109,8 +113,21 @@ private:
      *  blinkThreshold: how much a firefly has to want to be lit, before it lights up
      *  brightnessFalloff: how much a firefly's light dims in the center of the lit part
      */
-    Uniform<float> blinkThreshold = Uniform<float>("blinkThreshold", .6);
-    Uniform<float> brightnessFalloff = Uniform<float>("brightnessFalloff", 1.75f);
+    Uniform<float> blinkThreshold = Uniform<float>("blinkThreshold", .65);
+    Uniform<float> brightnessFalloff = Uniform<float>("brightnessFalloff", 1.685);
+
+    // center color
+    Uniform<int> renderCenter = Uniform<int>("renderCenter", 1);
+    Uniform<float> centerLightBase = Uniform<float>("centerLightBase", .5f);
+    Uniform<float> centerLightMu = Uniform<float>("centerLightMu", 2.f);
+    Uniform<float> centerDarkBase = Uniform<float>("centerDarkBase", 0.f);
+    Uniform<float> centerDarkMu = Uniform<float>("centerDarkMu", 15.f);
+
+    Uniform<int> renderGlow = Uniform<int>("renderGlow", 1);
+    Uniform<float> glowLightBase = Uniform<float>("glowLightBase", .5f);
+    Uniform<float> glowLightMu = Uniform<float>("glowLightMu", 1.25f);
+    Uniform<float> glowDarkBase = Uniform<float>("glowDarkBase", .65f);
+    Uniform<float> glowDarkMu = Uniform<float>("glowDarkMu", .5f);
 
 public:
     void init() override;
