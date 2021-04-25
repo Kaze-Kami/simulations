@@ -45,7 +45,7 @@ private:
      */
     static constexpr int
             COMPUTE_CLUSTERS_X = 3,
-            COMPUTE_CLUSTERS_Y = 2,
+            COMPUTE_CLUSTERS_Y = 3,
             COMPUTE_CLUSTERS_Z = 2,
             COMPUTE_CLUSTER_SIZE_BASE = 10,
 
@@ -88,6 +88,10 @@ private:
     Uniform<float> muVision = Uniform<float>("muVision", 3e1f);
     Uniform<float> muColor = Uniform<float>("muColor", 3e1f);
     Uniform<float> uDPhi = Uniform<float>("dPhi", 0);
+    Uniform<int> attractorEnable = Uniform<int>("attractorEnable", 0);
+    Uniform<float> attractorRange = Uniform<float>("attractorRange", .2f);
+    Uniform<float> attractorStrength = Uniform<float>("attractorStrength", 1.f);
+    Uniform<glm::vec2> attractorPosition = Uniform<glm::vec2>("attractorPosition", glm::vec2(0.f));
 
     /*
      * Rendering
@@ -124,6 +128,7 @@ protected:
     void onEvent(Event& e) override;
 private:
     bool onMouseButtonPressEvent(MouseButtonPressEvent& e);
+    bool onMouseButtonReleaseEvent(MouseButtonReleaseEvent& e);
     bool onKeyPressEvent(KeyPressEvent& e);
 
     void initFireflies();

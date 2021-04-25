@@ -61,6 +61,11 @@ void FirefliesApplication::onContextAttach(Context* context) {
     renderShader->uploadUniform(brightnessFalloff);
     renderShader->uploadUniform(cameraController.getCamera().getUniform());
 
+    renderShader->uploadUniform(attractorEnable);
+    renderShader->uploadUniform(attractorRange);
+    renderShader->uploadUniform(attractorStrength);
+    renderShader->uploadUniform(attractorPosition);
+
     // change compute shader
     shaderList.pushFromFile(
             ShaderType::COMPUTE,
@@ -135,11 +140,17 @@ void FirefliesApplication::update(float dt) {
     // update phi
     uDPhi.data = rd * TWO_PI;
 
+    // update distractor position
+    glm::vec2 mousePos = getWindow()->getInputController()->getMousePosition();
+    glm::vec4 worldPos = cameraController.getCamera().applyInverse(glm::vec4(mousePos.x, mousePos.y, 0.f, 1.f));
+    attractorPosition.data = glm::vec2(worldPos.x, worldPos.y);
+
     /* update quad shader dPhi */
     renderShader->use();
     renderShader->uploadUniform(uDPhi);
+    renderShader->uploadUniform(attractorPosition);
 
-    /* calculate change */
+    /* upload distractor position and calculate change */
     computeShader->use();
     GL_CALL(glDispatchCompute(COMPUTE_CLUSTERS_X, COMPUTE_CLUSTERS_Y, COMPUTE_CLUSTERS_Z));
     GL_CALL(glMemoryBarrier(GL_SHADER_STORAGE_BUFFER));
@@ -219,6 +230,9 @@ void FirefliesApplication::renderImGui() {
         if (holding) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
         ImGui::Text("Holding: %s", holding ? "true" : "false");
         if (holding) ImGui::PopStyleColor();
+        if (attractorEnable.data) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 1.f, 0.f, 1.f));
+        ImGui::Text("Attractor: %sactive", attractorEnable.data ? "" : "in");
+        if (attractorEnable.data) ImGui::PopStyleColor();
     }
     ImGui::End();
 
@@ -268,7 +282,7 @@ void FirefliesApplication::renderImGui() {
                 renderShader->use();
                 renderShader->uploadUniform(blinkThreshold);
             }
-            if (ImGui::DragFloat("Brightness falloff", &brightnessFalloff.data, .01f, 0.f, 2.f)) {
+            if (ImGui::DragFloat("Brightness falloff", &brightnessFalloff.data, .001f, 0.f, 2.f)) {
                 renderShader->uploadUniform(brightnessFalloff);
             }
 
@@ -297,6 +311,18 @@ void FirefliesApplication::renderImGui() {
             }
         }
 
+        if (ImGui::CollapsingHeader("Attractor")) {
+            if (ImGui::DragFloat("Range", &attractorRange.data, .001f, 0.f, 1.f)) {
+                renderShader->use();
+                renderShader->uploadUniform(attractorRange);
+            }
+
+            if (ImGui::DragFloat("Strength", &attractorStrength.data, 0.001f, 0.f, 1.f)) {
+                renderShader->use();
+                renderShader->uploadUniform(attractorStrength);
+            }
+        }
+
         if (ImGui::CollapsingHeader("Base")) {
             ImGui::DragInt("Num colors", &numColors, 1, 0, 20);
             ImGui::DragFloat("Firefly size", &fireflySize, .001f, 0.f, 1.f);
@@ -309,14 +335,31 @@ void FirefliesApplication::renderImGui() {
 void FirefliesApplication::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<MouseButtonPressEvent>(BIND_FN(FirefliesApplication::onMouseButtonPressEvent));
+    dispatcher.dispatch<MouseButtonReleaseEvent>(BIND_FN(FirefliesApplication::onMouseButtonReleaseEvent));
     dispatcher.dispatch<KeyPressEvent>(BIND_FN(FirefliesApplication::onKeyPressEvent));
 }
 
 bool FirefliesApplication::onMouseButtonPressEvent(MouseButtonPressEvent& e) {
     if (e.code == Mouse::ButtonLeft) {
-        Camera& camera = cameraController.getCamera();
-        glm::vec4 worldAt = camera.applyInverse(glm::vec4(e.pos.x, e.pos.y, 0.f, 1.f));
-        LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e.pos.x, e.pos.y, worldAt.x, worldAt.y);
+        if (getWindow()->getInputController()->isKeyDown(Key::LeftAlt)) {
+            Camera& camera = cameraController.getCamera();
+            glm::vec4 worldAt = camera.applyInverse(glm::vec4(e.pos.x, e.pos.y, 0.f, 1.f));
+            LOG_INFO("Mouse Position: ({}, {}) [({}, {})]", e.pos.x, e.pos.y, worldAt.x, worldAt.y);
+        } else {
+            attractorEnable.data = true;
+            renderShader->use();
+            renderShader->uploadUniform(attractorEnable);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FirefliesApplication::onMouseButtonReleaseEvent(MouseButtonReleaseEvent& e) {
+    if (e.code == Mouse::ButtonLeft) {
+        attractorEnable.data = false;
+        renderShader->use();
+        renderShader->uploadUniform(attractorEnable);
     }
     return false;
 }
