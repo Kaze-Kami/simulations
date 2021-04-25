@@ -3,6 +3,51 @@
 /*
  * Created by Kami-Kaze on 4/11/2021.
  * Next Steps:
+ *      - todo: infinite scrolling
+ *          -! concerns:
+ *              loss of quality when zooming in
+ *          - 'connect' screen bounds in update
+ *              > left of left is left of right
+ *              > below bottom is below top
+ *          - use post processing to render duplicates
+ *              > render to texture with -1 <= x, y <= 1
+ *              > re-render texture mapped to actual screen bounds
+ *                  > use texture settings to auto-mirror as needed
+ *      - todo: R3
+ *          - use index buffer and new compute shader to determine render order
+ *              > see note about improving shader performance below as well
+ *              > re-calculate index buffer every time our camera moves
+ *              > use vC * vF to project all fireflies onto view axis
+ *              > sort according to dot product
+ *          - in vertex shader
+ *              > use fireflies[indexBuffer[myId]] instead of fireflies[myId]
+ *              > to determine which firefly to render
+ *
+ *      - todo: visualize color functions in ui. Consider:
+ *              - https://github.com/soulthreads/imgui-plot
+ *              - https://github.com/epezent/implot
+ *              - see not about improving shader performance below as well
+ *
+ *      - todo: improve shader performance again (probably after all the other steps)
+ *          > use index buffer and count variable
+ *            to determine the count of fireflies we need to render
+ *            (don't even try to render fireflies that are 'off').
+ *          > simplify equations if possible
+ *              - eg.: we use x: f'(x) = 0; y = f(i / x)
+ *                     and often f(i / x) can be expressed in an easy way
+ *                     if we precalculate x (at compile time)
+ *          > prevent duplicate calculations
+ *              - eg.:           y = x^2(a-x^2)
+ *                  <=> x = x^2; y = x(a-x);
+ *          > generate textures
+ *              > no need to calculate color maps for fireflies
+ *                every time we render it.
+ *              > instead: use compute shader to create color (brightness/alpha?) maps for
+ *                render shaders when ever our color parameters are being changed
+ *                and remove (most) calculations from our render pipeline
+ *              - side note: if we have these textures, we can 'display' an example firefly in our ui
+ *                           so the user can see the effect of the color parameters more easy.
+ *                           (no need to zoom in on a single (isolated) firefly for testing anymore)
  *
  */
 
