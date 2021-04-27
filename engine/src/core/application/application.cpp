@@ -29,8 +29,19 @@ namespace Engine {
         // run setup
         setup(props);
 
-        // create window and do other stuff
-        window = Window::create(props.windowProps, BIND_FN(dispatchEvent));
+        // create window
+        const WindowProps& windowProps = props.windowProps;
+        window = Window::create(windowProps, BIND_FN(dispatchEvent));
+
+        // set target frame time
+        float targetFramerate = float(windowProps.targetFramerate);
+
+        if (windowProps.vsync) {
+            targetFramerate = window->getMonitorFramerate();
+            LOG_CORE_INFO("Vsync enable, using monitor framerate as target: {}", int(targetFramerate));
+        }
+
+        targetFrameTime = 2.f / targetFramerate;
 
         initialized = true;
     }
@@ -47,48 +58,80 @@ namespace Engine {
     void Application::run() {
         CORE_ASSERT(initialized, "Application not initialized!");
 
-        LOG_CORE_TRACE("Application started!");
-        running = true;
-
+        // attach context
         Context* context = window->getContext();
         context->bind();
         onContextAttach(context);
 
+        // clear window event queue
+        window->pollEvents();
+
+        // init input controller
         InputController* inputController = window->getInputController();
         inputController->init();
 
+        // init last frame time
         lastFrameTime = (float) glfwGetTime();
+
+        LOG_CORE_TRACE("Application started!");
+        running = true;
 
         while (running) {
             // update events
             window->pollEvents();
             inputController->update();
 
-
-            float t = (float) glfwGetTime();
+            // calculate dt
+            float t = float(glfwGetTime());
             float dt = t - lastFrameTime;
-            lastFrameTime = t;
 
-            // update
-            update(dt);
+            /*
+             * Subject: 27k fireflies
+             * With dynamic updates
+             *      28.3ms
+             *
+             * Without dynamic updates
+             *      41.5ms
+             */
 
-            // render pass
-            context->beginFrame();
-            render(context);
-            context->endFrame();
+            if (dt < targetFrameTime || didSkipFrame) {
+                didSkipFrame = false;
+                lastFrameTime = t;
+
+                // update
+                update(dt);
+
+                // render pass
+                context->beginFrame();
+                render(context);
+                context->endFrame();
+            } else {
+                LOG_CORE_INFO("Skipping frame! (delta = {:.4f}ms)", (dt - targetFrameTime) * 1e3);
+                // we were to late for this frame, skip it.
+                // instead just do a bigger update next frame.
+                didSkipFrame = true;
+
+                skipFrameUpdate();
+
+                // context->beginFrame();
+                // render(context);
+                // context->endFrame();
+            }
 
             // imgui render pass
             context->beginImGuiFrame();
             renderImGui();
             context->endImGuiFrame();
 
+            // swap buffers
             context->swapBuffers();
         }
 
+        LOG_CORE_TRACE("Application stopped!");
+
+        // detach context
         onContextDetach(context);
         context->unbind();
-
-        LOG_CORE_TRACE("Application stopped!");
     }
 
     void Application::stop() {

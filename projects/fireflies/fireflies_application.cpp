@@ -117,7 +117,7 @@ void FirefliesApplication::setup(ApplicationProps& props) {
     windowProps.center = true;
     windowProps.multisample = 16;
     // so we can see how much of a margin we got for increasing the number of fireflies
-    windowProps.vsync = false;
+    // windowProps.vsync = false;
     windowProps.fpsCounterEnable = true;
     windowProps.fpsCounterColor = glm::vec4(1.f);
 

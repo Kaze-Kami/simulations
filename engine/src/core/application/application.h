@@ -13,7 +13,7 @@
 namespace Engine {
 
     struct ApplicationProps {
-        std::string name;
+        std::string name = "";
         WindowProps windowProps;
     };
 
@@ -39,7 +39,8 @@ namespace Engine {
         static Application* createApplication();
 
     protected:
-        inline virtual void setup(ApplicationProps& props) {};  // todo: improve naming
+        inline virtual void setup(ApplicationProps& props) {}   // todo: improve naming
+        inline virtual void skipFrameUpdate() {}                // called if we need to skip a frame
         inline virtual void update(float dt) {}
         inline virtual void render(Context* context) {}
         inline virtual void renderImGui() {}
@@ -50,8 +51,8 @@ namespace Engine {
         bool onWindowViewportChangeEvent(WindowViewportChangeEvent& e);
         bool onWindowCloseEvent(WindowCloseEvent& e);
 
-        bool initialized = false, running = false;
-        float lastFrameTime = 0;
+        bool initialized = false, running = false, didSkipFrame = false;
+        float lastFrameTime = 0, targetFrameTime = 60;
 
         Window* window = nullptr;
 

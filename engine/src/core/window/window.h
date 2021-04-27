@@ -28,6 +28,8 @@ namespace Engine {
         virtual float getWidth() = 0;
         virtual float getHeight() = 0;
 
+        virtual float getMonitorFramerate() = 0;
+
         inline glm::vec2 getSize() {
             return glm::vec2(getWidth(), getHeight());
         }

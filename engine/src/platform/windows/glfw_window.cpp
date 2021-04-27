@@ -97,6 +97,7 @@ namespace Engine {
 
         GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+        data.monitorFramerate = videoMode->refreshRate;
         data.monitor = nullptr;
 
         if (props.fullscreen || props.maximized) {
@@ -264,15 +265,19 @@ namespace Engine {
     }
 
     float GlfwWindow::getWidth() {
-        return data.width;
+        return float(data.width);
     }
 
     float GlfwWindow::getHeight() {
-        return data.height;
+        return float(data.height);
     }
 
     InputController* GlfwWindow::getInputController() {
         return inputController;
+    }
+
+    float GlfwWindow::getMonitorFramerate() {
+        return data.monitorFramerate;
     }
 
 }

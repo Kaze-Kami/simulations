@@ -19,9 +19,12 @@ namespace Engine {
             positionX = 0, positionY = 0,
             multisample = 1;
 
-        // fullscreen, vsync and multisample
-        bool vsync = true,
-             fullscreen = false, center=true;
+        // fullscreen windows
+        bool fullscreen = false, center=true;
+
+        // vsync and framerate
+        bool vsync = true;
+        int targetFramerate = 60;
 
         // 'standard' msc flags
         bool decorated = true,

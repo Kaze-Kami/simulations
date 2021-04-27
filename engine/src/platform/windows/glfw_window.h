@@ -43,6 +43,8 @@ namespace Engine {
         float getWidth() override;
         float getHeight() override;
 
+        float getMonitorFramerate() override;
+
         InputController* getInputController() override;
 
     private:
@@ -53,6 +55,7 @@ namespace Engine {
         struct WindowData {
             int width = 0, height = 0, posX = 0, posY = 0;
             int vpWidth = 0, vpHeight = 0;
+            float monitorFramerate = 0;
 
             // everything we need within the glfw callbacks
             EventFunction eventFunction;
