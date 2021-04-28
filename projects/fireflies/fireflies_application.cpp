@@ -81,7 +81,7 @@ void FirefliesApplication::onContextAttach(Context* context) {
     // change compute shader
     shaderList.pushFromFile(
             ShaderType::COMPUTE,
-            R"(resources\compute_shader.glsl)"
+            R"(resources\nudge_compute_shader.glsl)"
     );
     computeShader = ShaderProgram::createProgram(shaderList);
     shaderList.clear();
@@ -116,7 +116,8 @@ void FirefliesApplication::setup(ApplicationProps& props) {
     windowProps.height = 1000;
     windowProps.center = true;
     windowProps.multisample = 16;
-    // so we can see how much of a margin we got for increasing the number of fireflies
+    // disable vsync so we can see how much
+    // of a margin we got for increasing the number of fireflies
     windowProps.vsync = false;
     windowProps.fpsCounterEnable = true;
     windowProps.fpsCounterColor = glm::vec4(1.f);
@@ -453,6 +454,7 @@ void FirefliesApplication::initFireflies() {
         FireflyData& f = fireflies[0];
         f.position = glm::vec2(0.f);
         f.color = glm::rgbColor(glm::vec3(dist01(engine) * 360.f, 1.f, 1.f));
+        f.color = glm::vec3(1.f, 0.f, 0.f);
         f.colorIndex = 0;
         f.size = .3;
         f.phi = .5f * glm::pi<float>();

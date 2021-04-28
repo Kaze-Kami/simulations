@@ -4,7 +4,7 @@ project(fireflies)
 set(SRC fireflies_main.cpp fireflies_application.cpp fireflies_application.h)
 
 set(RESOURCES
-        resources/compute_shader.glsl
+        resources/nudge_compute_shader.glsl
         resources/fragment_shader.glsl
         resources/geometry_shader.glsl
         resources/vertex_shader.glsl

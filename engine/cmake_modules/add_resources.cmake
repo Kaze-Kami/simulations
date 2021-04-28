@@ -15,7 +15,7 @@ function(add_resource_dir NAME)
             DEPENDS
                 ${__src__}
 
-            COMMENT "Copying resources for ${PROJECT_NAME}"
+            COMMENT "Copying resources for ${PROJECT_NAME}: ${__src__} -> ${__dst__}"
 
             COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${__src__}

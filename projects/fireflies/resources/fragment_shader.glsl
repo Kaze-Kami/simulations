@@ -26,7 +26,11 @@ uniform float glowDarkMu;
 
 vec3 mixColor(vec3 color, float mixLight, float mixDark) {
     // todo: this probably can be improved
-    return mix(mix(color, vec3(1.f), mixLight), vec3(0.f), mixDark);
+    // return mix(mix(color, vec3(1.f), mixLight), vec3(0.f), mixDark);
+    //      = mix(c(1 - l) + l, 0, d)
+    //      =     c(1 - l)(1 - d) + (1 - d)l
+    //      =     c(1 + (l - 1)d - l) + (1 - d)l
+    return color * (1.f - mixLight) * (1.f - mixDark) + (1.f - mixDark) * mixLight;
 }
 
 void main() {

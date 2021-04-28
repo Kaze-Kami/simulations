@@ -39,6 +39,8 @@ set(SRC
         src/core/renderer/shader_program/shader_program.cpp
         src/core/renderer/shader_program/shader_list.cpp
         src/core/renderer/shader_program/shader_list.h
+        src/core/renderer/texture/texture.cpp
+        src/core/renderer/texture/texture.h
         src/core/renderer/buffer/buffer.h
         src/core/renderer/vertex_array/vertex_array.h
         src/core/renderer/vertex_array/vertex_array_layout.h

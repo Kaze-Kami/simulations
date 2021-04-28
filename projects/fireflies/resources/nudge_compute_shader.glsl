@@ -1,6 +1,6 @@
 #version 450
 
-#define LOCAL_SIZE 10
+#define LOCAL_SIZE 1
 #define ONE_OVER_SQRT_3 0.577350269189625764509148780501
 
 struct Firefly {

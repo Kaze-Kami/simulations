@@ -23,11 +23,12 @@ struct Vertex {
 layout (location = 0) out Vertex o_vertex;
 
 uniform float fireflySize;
+
 uniform float blinkThreshold;
+uniform float brightnessFalloff;
+
 uniform mat4 view;
 uniform mat4 proj;
-
-uniform float brightnessFalloff;
 
 const mat4 mvp = view;
 

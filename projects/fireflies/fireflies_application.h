@@ -89,10 +89,10 @@ private:
      * compute shader cluster config
      */
     static constexpr int
-            COMPUTE_CLUSTERS_X = 3,
-            COMPUTE_CLUSTERS_Y = 3,
-            COMPUTE_CLUSTERS_Z = 3,
-            COMPUTE_CLUSTER_SIZE_BASE = 10,
+            COMPUTE_CLUSTERS_X = 1,
+            COMPUTE_CLUSTERS_Y = 1,
+            COMPUTE_CLUSTERS_Z = 1,
+            COMPUTE_CLUSTER_SIZE_BASE = 1,
 
     COMPUTE_CLUSTER_SIZE_X = COMPUTE_CLUSTER_SIZE_BASE,
             COMPUTE_CLUSTER_SIZE_Y = COMPUTE_CLUSTER_SIZE_BASE,
